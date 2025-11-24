@@ -1,0 +1,134 @@
+---
+title: "Motorcycle Risk Prediction API"
+publishedAt: "2025-11-25"
+summary: "A production-style FastAPI service that predicts motorcycle ride risk using a trained ML model, with a live docs endpoint and GitHub-hosted code."
+images:
+  - "/images/projects/motorcycle-risk/cover-01.png"
+team:
+  - name: "Anmol Malik"
+    role: "AI & ML · MLOps · Cloud"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/malikanmol/"
+    link: "https://github.com/anmolmalik95/motorcycle-risk-prediction-api"
+---
+
+## Overview
+
+This project exposes a machine learning model as a production-style REST API that estimates **risk levels for a motorcycle ride** given contextual features (weather, distance, visibility, time of day, and rider experience).
+
+The goal was to go beyond a local notebook model and build something closer to what an engineer would ship:
+a **reproducible pipeline**, a **clean FastAPI service**, and a **cloud deployment** with live documentation.
+
+The project is fully open-source and available on GitHub:
+
+- **GitHub:** [LINK](https://github.com/anmolmalik95/motorcycle-risk-prediction-api)  
+- **Live Demo:** [Render](https://motorcycle-risk-prediction-api.onrender.com/docs#/risk/predict_api_v1_risk_predict_risk_post)
+
+---
+
+## Problem Framing
+
+Motorcyclists routinely make ride/no-ride decisions under uncertainty: changing weather, distance, visibility, time of day, and their own skill level.  
+
+Instead of hand-wavy “it looks risky”, this project asks:
+
+> *Given a set of riding conditions, what is the predicted risk level for this ride?*
+
+The API returns a **numerical risk score** (and interpretable categories) that can be used for:
+
+- Pre-ride decision support (“Should I still ride?”)
+- Scenario analysis (“What if I leave earlier / later?”)
+- Education (“How much does rain or low visibility really affect risk?”)
+
+---
+
+## Data & Features
+
+The model is trained on a structured dataset representing ride conditions and outcomes.  
+The core features include:
+
+- `temp` – temperature at time of ride  
+- `rainfall` – rainfall / precipitation intensity  
+- `visibility` – approximate visibility range  
+- `distance` – trip distance  
+- `time_of_day` – encoded representation of when the ride starts  
+- `experience` – rider experience level  
+- `risk` – target label (e.g. low / medium / high or a continuous risk score)
+
+The dataset uses a mix of **synthetic and realistically-inspired patterns**, designed to reflect plausible relationships between conditions and risk while remaining fully anonymised and safe to share.
+
+---
+
+## Modelling Approach
+
+The project uses a classic supervised learning setup:
+
+- **Model family:** Random Forest
+- **Library:** scikit-learn
+- **Pipeline:**
+  - feature selection and preprocessing
+  - train/validation split
+  - model training and evaluation with appropriate metrics
+- **Outputs:**
+  - a persisted model artefact (`.pkl`) for use in the API
+  - evaluation metrics (e.g. accuracy / F1 or regression metrics depending on framing)
+
+The emphasis is not on squeezing out the last 0.5% of performance, but on **clean structure**, **reproducibility**, and **serving the model in a realistic way**.
+
+---
+
+## API Design & Implementation
+
+The model is served via a **FastAPI** application, exposing a simple, well-typed endpoint:
+
+- **Endpoint:** `POST /api/v1/risk/predict`  
+- **Input:** JSON body with the core riding features  
+- **Output:** predicted risk score + human-readable interpretation
+
+Implementation highlights:
+
+- **FastAPI + Pydantic** for request/response validation and automatic OpenAPI schema.
+- **Dedicated prediction service layer** that loads the model artefact and handles inference.
+- **Separation of concerns** between:
+  - model training script
+  - API app
+  - configuration
+- **Automatic interactive docs** at `/docs` (Swagger UI) and `/redoc`.
+
+The live docs are available here:
+
+- https://motorcycle-risk-prediction-api.onrender.com/docs#/risk/predict_api_v1_risk_predict_risk_post
+
+---
+
+## Deployment
+
+The API is deployed on **Render**, using:
+
+- A `Dockerfile`-free, Python service deployment (or container, depending on setup)
+- Environment configuration for dependencies
+- A startup command that runs the FastAPI app with Uvicorn
+
+This mimics a **realistic ML deployment path**:
+
+1. Train locally
+2. Persist the model artefact
+3. Package the serving code
+4. Deploy to a managed cloud service
+5. Verify via live docs and test calls
+
+---
+
+## Example Usage
+
+A typical request to the API looks like:
+
+```json
+{
+  "temp": 30,
+  "rainfall": 0.4,
+  "visibility": 5,
+  "distance": 80,
+  "time_of_day": "night",
+  "experience": "beginner"
+}

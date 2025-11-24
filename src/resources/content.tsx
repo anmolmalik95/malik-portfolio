@@ -2,18 +2,18 @@ import { About, Blog, Gallery, Home, Newsletter, Person, Social, Work } from "@/
 import { Line, Logo, Row, Text } from "@once-ui-system/core";
 
 const person: Person = {
-  firstName: "Selene",
-  lastName: "Yu",
-  name: `Selene Yu`,
-  role: "Design Engineer",
+  firstName: "Anmol",
+  lastName: "Malik",
+  name: `Anmol Malik`,
+  role: "AI & Machine Learning · MLOps · Cloud",
   avatar: "/images/avatar.jpg",
-  email: "example@gmail.com",
-  location: "Asia/Jakarta", // Expecting the IANA time zone identifier, e.g., 'Europe/Vienna'
-  languages: ["English", "Bahasa"], // optional: Leave the array empty if you don't want to display languages
+  email: "anmolmalik@hotmail.com",
+  location: "Asia/Singapore", // Expecting the IANA time zone identifier, e.g., 'Europe/Vienna'
+  languages: ["English", "Hindi", "Punjabi", "Mandarin (Well, a little)"], // optional: Leave the array empty if you don't want to display languages
 };
 
 const newsletter: Newsletter = {
-  display: true,
+  display: false,
   title: <>Subscribe to {person.firstName}'s Newsletter</>,
   description: <>My weekly newsletter about creativity and engineering</>,
 };
@@ -25,25 +25,13 @@ const social: Social = [
   {
     name: "GitHub",
     icon: "github",
-    link: "https://github.com/once-ui-system",
+    link: "https://github.com/anmolmalik95",
     essential: true,
   },
   {
     name: "LinkedIn",
     icon: "linkedin",
-    link: "https://www.linkedin.com/company/once-ui/",
-    essential: true,
-  },
-  {
-    name: "Instagram",
-    icon: "instagram",
-    link: "https://www.instagram.com/once_ui/",
-    essential: false,
-  },
-  {
-    name: "Threads",
-    icon: "threads",
-    link: "https://www.threads.com/@once_ui",
+    link: "https://www.linkedin.com/in/malikanmol/",
     essential: true,
   },
   {
@@ -58,9 +46,9 @@ const home: Home = {
   path: "/",
   image: "/images/og/home.jpg",
   label: "Home",
-  title: `${person.name}'s Portfolio`,
-  description: `Portfolio website showcasing my work as a ${person.role}`,
-  headline: <>Building bridges between design and code</>,
+  title: `${person.name}· AI & Machine Learning`,
+  description: `Projects, experiments, and writing on AI, MLOps, and data systems by ${person.name}.`,
+  headline: <>Building reliable, production-ready AI systems</>,
   featured: {
     display: true,
     title: (
@@ -76,14 +64,9 @@ const home: Home = {
   },
   subline: (
     <>
-      I'm Selene, a design engineer at{" "}
-      <Logo
-        dark
-        icon="/trademarks/wordmark-dark.svg"
-        style={{ display: "inline-flex", top: "0.25em", marginLeft: "-0.25em" }}
-      />
-      , where I craft intuitive
-      <br /> user experiences. After hours, I build my own projects.
+      I'm {person.firstName}, an AI-focused builder currently pursuing the MITB (Artificial Intelligence)
+    at SMU in Singapore. I work on practical projects across machine learning, MLOps, statistical
+    analysis, and backend systems - with an eye toward infrastructure and solutions architecture.
     </>
   ),
 };
@@ -101,7 +84,7 @@ const about: About = {
     display: true,
   },
   calendar: {
-    display: true,
+    display: false,
     link: "https://cal.com",
   },
   intro: {
@@ -109,9 +92,15 @@ const about: About = {
     title: "Introduction",
     description: (
       <>
-        Selene is a Jakarta-based design engineer with a passion for transforming complex challenges
-        into simple, elegant design solutions. Her work spans digital interfaces, interactive
-        experiences, and the convergence of design and technology.
+      Anmol is a Singapore-based AI and machine learning practitioner with a background in
+      product management and AI-driven products. He is currently pursuing the Master of IT in
+      Business (Artificial Intelligence track) at SMU, focusing on applied machine learning,
+      MLOps, and cloud infrastructure.
+      <br />
+      <br />
+      He enjoys designing systems that are not just smart on paper, but observable,
+      testable, and deployable - from statistical analysis and ML models to APIs and backend
+      services that real users can touch.
       </>
     ),
   },
@@ -120,41 +109,91 @@ const about: About = {
     title: "Work Experience",
     experiences: [
       {
-        company: "FLY",
-        timeframe: "2022 - Present",
-        role: "Senior Design Engineer",
+        company: "Attix APAC",
+        timeframe: "Jul 2024 – Jul 2025",
+        role: "Product Manager, AI & ML Systems",
         achievements: [
           <>
-            Redesigned the UI/UX for the FLY platform, resulting in a 20% increase in user
-            engagement and 30% faster load times.
+            Delivered product roadmaps for hedge-fund ML engines (MidasAI, AlphaPilot), an AI OMS (QuantHare),
+            and an automotive intelligence platform (Vittori).
           </>,
           <>
-            Spearheaded the integration of AI tools into design workflows, enabling designers to
-            iterate 50% faster.
+            Drove cross-functional execution across UI/UX, ML engineers, quants, and backend teams to ship
+            AI-driven product milestones.
+          </>,
+          <>
+            Evaluated trading strategies using Sharpe, Sortino, and drawdown metrics to assess model readiness for
+            deployment under client-specific risk profiles.
+          </>,
+          <>
+            Coordinated TradeGPT (LLM) development — PRDs, backlog, sprint alignment, feature delivery, and
+            evaluation of model behaviour/quality.
+          </>,
+          <>
+            Established internal AI governance frameworks, enabling transparent model performance reporting,
+            risk visibility, and traceable decision-making.
+          </>,
+          <>
+            Led productisation of QuantHare by defining functional requirements, technical workflows, and UI/UX
+            for a client-grade proof of concept.
           </>,
         ],
-        images: [
-          // optional: leave the array empty if you don't want to display images
-          {
-            src: "/images/projects/project-01/cover-01.jpg",
-            alt: "Once UI Project",
-            width: 16,
-            height: 9,
-          },
-        ],
+        images: [],
       },
       {
-        company: "Creativ3",
-        timeframe: "2018 - 2022",
-        role: "Lead Designer",
+        company: "Microgaming Asia",
+        timeframe: "May 2022 – Apr 2024",
+        role: "Product Manager, Games & Content",
         achievements: [
           <>
-            Developed a design system that unified the brand across multiple platforms, improving
-            design consistency by 40%.
+            Owned full product lifecycle for APAC casino products — concept, requirements, launch, analysis, and
+            continuous iteration.
           </>,
           <>
-            Led a cross-functional team to launch a new product line, contributing to a 15% increase
-            in overall company revenue.
+            Improved delivery velocity by 2× across the regional slot-games portfolio by redesigning workflow and
+            cross-functional coordination.
+          </>,
+          <>
+            Partnered with engineering, art, math, and vendor teams to ship new content on predictable timelines.
+          </>,
+          <>
+            Built data-driven bet-setting and retention frameworks, contributing to +8% revenue lift and 20%
+            improvement in early-game uptake.
+          </>,
+          <>
+            Represented APAC product expertise at industry events and seminars, presenting game analytics and
+            performance trends.
+          </>,
+        ],
+        images: [],
+      },
+      {
+        company: "3M",
+        timeframe: "Mar 2020 – Mar 2021",
+        role: "Junior Project Manager",
+        achievements: [
+          <>
+            Implemented Jira workflows for enterprise clients (Dyson, Adidas, Parkway), improving project visibility
+            and cross-team coordination.
+          </>,
+          <>
+            Managed invoicing and time-tracking for a 40-person regional team across multi-country campaigns.
+          </>,
+        ],
+        images: [],
+      },
+      {
+        company: "Early Career Roles",
+        timeframe: "2017 – 2019",
+        role: "Project & Operations Support",
+        achievements: [
+          <>
+            Supported project management workflows across marketing and operations roles at That Marketing Guy
+            and Apostrophe Collective.
+          </>,
+          <>
+            Developed early experience in stakeholder communication, execution support, and operational
+            coordination.
           </>,
         ],
         images: [],
@@ -163,15 +202,26 @@ const about: About = {
   },
   studies: {
     display: true, // set to false to hide this section
-    title: "Studies",
+    title: "Education",
     institutions: [
       {
-        name: "University of Jakarta",
-        description: <>Studied software engineering.</>,
+        name: "Singapore Management University (SMU)",
+        description: <>Master of IT in Business (Artificial Intelligence Track)
+        <br />  <br />
+          Applied machine learning, statistical modelling, query optimisation,  
+          algorithm design, MLOps fundamentals, and AI deployment workflows.</>,
       },
       {
-        name: "Build the Future",
-        description: <>Studied online marketing and personal branding.</>,
+        name: "Murdoch University, Western Australia",
+        description: <>Bachelor of Marketing & Business Law
+        <br />  <br />
+          Consumer behaviour, analytics, strategic communication, and commercial legal frameworks.</>,
+      },
+      {
+        name: "Singapore Institute of Management (SIM)",
+        description: <>Diploma in Management Studies
+        <br />  <br />
+          Management fundamentals, business analytics, and organisational processes.</>,
       },
     ],
   },
@@ -180,61 +230,86 @@ const about: About = {
     title: "Technical skills",
     skills: [
       {
-        title: "Figma",
+        title: "Python & Machine Learning",
         description: (
-          <>Able to prototype in Figma with Once UI with unnatural speed.</>
+          <>
+          </>
         ),
         tags: [
-          {
-            name: "Figma",
-            icon: "figma",
-          },
+          { name: "Python", icon: "python" },
+          { name: "pandas", icon: "python" },
+          { name: "NumPy", icon: "python" },
+          { name: "scikit-learn", icon: "python" },
         ],
-        // optional: leave the array empty if you don't want to display images
-        images: [
-          {
-            src: "/images/projects/project-01/cover-02.jpg",
-            alt: "Project image",
-            width: 16,
-            height: 9,
-          },
-          {
-            src: "/images/projects/project-01/cover-03.jpg",
-            alt: "Project image",
-            width: 16,
-            height: 9,
-          },
-        ],
+        images: [],
       },
       {
-        title: "Next.js",
+        title: "Statistics & Data Modelling",
         description: (
-          <>Building next gen apps with Next.js + Once UI + Supabase.</>
+          <>
+          </>
         ),
         tags: [
-          {
-            name: "JavaScript",
-            icon: "javascript",
-          },
-          {
-            name: "Next.js",
-            icon: "nextjs",
-          },
-          {
-            name: "Supabase",
-            icon: "supabase",
-          },
+          { name: "Statistics", icon: "chart" },
+          { name: "EDA", icon: "chart" },
+          { name: "Regression", icon: "chart" },
         ],
-        // optional: leave the array empty if you don't want to display images
-        images: [
-          {
-            src: "/images/projects/project-01/cover-04.jpg",
-            alt: "Project image",
-            width: 16,
-            height: 9,
-          },
+        images: [],
+      },
+      {
+        title: "APIs, Backend & Deployment",
+        description: (
+          <>
+          </>
+        ),
+        tags: [
+          { name: "FastAPI", icon: "api" },
+          { name: "REST", icon: "api" },
+          { name: "Render", icon: "cloud" },
+          { name: "Vercel", icon: "cloud" },
         ],
-      },  
+        images: [],
+      },
+      {
+        title: "Databases & Query Optimisation",
+        description: (
+          <>
+          </>
+        ),
+        tags: [
+          { name: "SQL", icon: "database" },
+          { name: "Query Optimisation", icon: "database" },
+          { name: "Database Design", icon: "database" },
+        ],
+        images: [],
+      },
+      {
+        title: "MLOps Foundations & Engineering Workflow",
+        description: (
+          <>
+          </>
+        ),
+        tags: [
+          { name: "Git", icon: "github" },
+          { name: "CI/CD", icon: "github" },
+          { name: "Docker (Learning)", icon: "docker" },
+        ],
+        images: [],
+      },
+      {
+        title: "Cloud Platforms & Serverless Deployment",
+        description: (
+          <>
+          </>
+        ),
+        tags: [
+          { name: "AWS (Exposure)", icon: "cloud" },
+          { name: "Azure (Exposure)", icon: "cloud" },
+          { name: "Render", icon: "cloud" },
+          { name: "Vercel", icon: "cloud" },
+        ],
+        images: [],
+      },      
     ],
   },
 };

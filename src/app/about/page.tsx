@@ -218,7 +218,7 @@ export default function About() {
                         {experience.timeframe}
                       </Text>
                     </Row>
-                    <Text variant="body-default-s" onBackground="brand-weak" marginBottom="m">
+                    <Text variant="body-default-s" onBackground="brand-weak" marginBottom="xxs">
                       {experience.role}
                     </Text>
                     <Column as="ul" gap="16">
