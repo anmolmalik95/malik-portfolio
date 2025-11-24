@@ -17,7 +17,7 @@ interface ProjectCardProps {
   title: string;
   content: string;
   description: string;
-  avatars: { src: string }[];
+  avatars?: { src: string }[];
   link: string;
 }
 
@@ -54,14 +54,15 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             </Heading>
           </Flex>
         )}
-        {(avatars?.length > 0 || description?.trim() || content?.trim()) && (
-          <Column flex={7} gap="16">
-            {avatars?.length > 0 && <AvatarGroup avatars={avatars} size="m" reverse />}
-            {description?.trim() && (
-              <Text wrap="balance" variant="body-default-s" onBackground="neutral-weak">
-                {description}
-              </Text>
-            )}
+        {(description?.trim() || content?.trim()) && (
+        <Column flex={7} gap="16">
+          {/* Avatar removed */}
+          {description?.trim() && (
+            <Text wrap="balance" variant="body-default-s" onBackground="neutral-weak">
+              {description}
+            </Text>
+          )}
+
             <Flex gap="24" wrap>
               {content?.trim() && (
                 <SmartLink
