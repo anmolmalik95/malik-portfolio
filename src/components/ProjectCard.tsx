@@ -30,62 +30,61 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   avatars,
   link,
 }) => {
+  const hasBody = description?.trim() || content?.trim();
+
   return (
-    <Column fillWidth gap="m">
-      <Carousel
-        sizes="(max-width: 960px) 100vw, 960px"
-        items={images.map((image) => ({
-          slide: image,
-          alt: title,
-        }))}
-      />
-      <Flex
-        s={{ direction: "column" }}
-        fillWidth
-        paddingX="s"
-        paddingTop="12"
-        paddingBottom="24"
-        gap="l"
-      >
-        {title && (
-          <Flex flex={5}>
-            <Heading as="h2" wrap="balance" variant="heading-strong-xl">
-              {title}
-            </Heading>
-          </Flex>
-        )}
-        {(description?.trim() || content?.trim()) && (
-        <Column flex={7} gap="16">
-          {/* Avatar removed */}
-          {description?.trim() && (
-            <Text wrap="balance" variant="body-default-s" onBackground="neutral-weak">
-              {description}
-            </Text>
+    <SmartLink href={href} className="project-card-clickable">
+      <Column fillWidth gap="m">
+        <Carousel
+          sizes="(max-width: 960px) 100vw, 960px"
+          items={images.map((image) => ({
+            slide: image,
+            alt: title,
+          }))}
+        />
+        <Flex
+          s={{ direction: "column" }}
+          fillWidth
+          paddingX="s"
+          paddingTop="12"
+          paddingBottom="24"
+          gap="l"
+        >
+          {title && (
+            <Flex flex={5}>
+              <Heading as="h2" wrap="balance" variant="heading-strong-xl">
+                {title}
+              </Heading>
+            </Flex>
           )}
 
-            <Flex gap="24" wrap>
+          {hasBody && (
+            <Column flex={7} gap="16">
+              {description?.trim() && (
+                <Text
+                  wrap="balance"
+                  variant="body-default-s"
+                  onBackground="neutral-weak"
+                >
+                  {description}
+                </Text>
+              )}
+
               {content?.trim() && (
-                <SmartLink
-                  suffixIcon="arrowRight"
-                  style={{ margin: "0", width: "fit-content" }}
-                  href={href}
-                >
-                  <Text variant="body-default-s">Read case study</Text>
-                </SmartLink>
+                <Text variant="body-default-s">
+                  Read case study →
+                </Text>
               )}
+
               {link && (
-                <SmartLink
-                  suffixIcon="arrowUpRightFromSquare"
-                  style={{ margin: "0", width: "fit-content" }}
-                  href={link}
-                >
-                  <Text variant="body-default-s">View project</Text>
-                </SmartLink>
+                <Text variant="body-default-s" onBackground="neutral-weak">
+                  View project (external)
+                </Text>
               )}
-            </Flex>
-          </Column>
-        )}
-      </Flex>
-    </Column>
+            </Column>
+          )}
+        </Flex>
+      </Column>
+    </SmartLink>
   );
 };

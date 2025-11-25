@@ -52,3 +52,146 @@
   --scheme-neutral-600-50: rgba(137,152,159,0.5);
   /*
 }*/
+/* Generic page slide-in animation */
+.page-animate {
+  opacity: 0;
+  transform: translateX(-24px);
+  animation: page-slide-in 0.5s ease-out forwards;
+}
+
+@keyframes page-slide-in {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* (Optional) keep this if you already used it on /work */
+.work-page-animate {
+  opacity: 0;
+  transform: translateX(-24px);
+  animation: page-slide-in 0.5s ease-out forwards;
+}
+.project-card-clickable {
+  display: block;
+  text-decoration: none;
+}
+
+.project-card-clickable:hover {
+  opacity: 0.95;
+  transition: opacity 0.15s ease-out;
+}
+
+.project-card-clickable:active {
+  opacity: 0.85;
+}
+.hobbies-image-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.hobbies-image-card {
+  flex: 1 1 260px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.hobbies-image-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Optional modifiers if some images should be smaller / taller */
+.hobbies-image-card--small {
+  max-width: 360px;
+}
+
+.hobbies-image-card--tall img {
+  object-fit: contain;
+}
+.hobbies-image-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.hobbies-image-card {
+  flex: 1 1 260px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.hobbies-image-card img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.hobbies-image-card--small {
+  max-width: 360px;
+}
+
+.hobbies-image-card--tall img {
+  object-fit: contain;
+}
+
+.hobbies-book-card {
+  flex: 0 1 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.hobbies-image-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.hobbies-image-card {
+  flex: 1 1 260px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.hobbies-image-card img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.hobbies-image-card--small {
+  max-width: 360px;
+}
+
+.hobbies-image-card--tall img {
+  object-fit: contain;
+}
+
+.hobbies-book-row-left {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: flex-start;
+}
+
+.hobbies-book-card {
+  width: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.hobbies-book-card a {
+  text-decoration: none;
+}
+
+.hobbies-book-card img {
+  border-radius: 12px;
+  display: block;
+}
+

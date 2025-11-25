@@ -132,7 +132,7 @@ export const Header = () => {
                 <>
                   <Row s={{ hide: true }}>
                     <ToggleButton
-                      prefixIcon="book"
+                      prefixIcon="dog"
                       href="/blog"
                       label={blog.label}
                       selected={pathname.startsWith("/blog")}
@@ -140,14 +140,14 @@ export const Header = () => {
                   </Row>
                   <Row hide s={{ hide: false }}>
                     <ToggleButton
-                      prefixIcon="book"
+                      prefixIcon="dog"
                       href="/blog"
                       selected={pathname.startsWith("/blog")}
                     />
                   </Row>
                 </>
               )}
-              {routes["/gallery"] && (
+              {/* {routes["/gallery"] && (
                 <>
                   <Row s={{ hide: true }}>
                     <ToggleButton
@@ -165,7 +165,27 @@ export const Header = () => {
                     />
                   </Row>
                 </>
-              )}
+              )} */}
+
+              {/* Contact */}
+              <Row s={{ hide: true }}>
+                <ToggleButton
+                  prefixIcon="email"        // check icons.ts if you prefer another name
+                  href="/contact"
+                  label="Contact"
+                  selected={pathname.startsWith("/contact")}
+                />
+              </Row>
+              <Row hide s={{ hide: false }}>
+                <ToggleButton
+                  prefixIcon="email"
+                  href="/contact"
+                  selected={pathname.startsWith("/contact")}
+                />
+              </Row>
+
+
+              
               {display.themeSwitcher && (
                 <>
                   <Line background="neutral-alpha-medium" vert maxHeight="24" />

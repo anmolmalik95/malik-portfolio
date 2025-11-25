@@ -51,7 +51,7 @@ export default function About() {
     },
   ];
   return (
-    <Column maxWidth="m">
+    <Column maxWidth="m" className="page-animate">
       <Schema
         as="webPage"
         baseURL={baseURL}

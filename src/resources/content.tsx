@@ -48,9 +48,9 @@ const home: Home = {
   label: "Home",
   title: `${person.name}· AI & Machine Learning`,
   description: `Projects, experiments, and writing on AI, MLOps, and data systems by ${person.name}.`,
-  headline: <>Building reliable, production-ready AI systems</>,
+  headline: <>Turning messy ideas into clean, deployable AI</>,
   featured: {
-    display: true,
+    display: false,
     title: (
       <Row gap="12" vertical="center">
         <strong className="ml-4">Once UI</strong>{" "}
@@ -64,9 +64,7 @@ const home: Home = {
   },
   subline: (
     <>
-      I'm {person.firstName}, an AI-focused builder currently pursuing the MITB (Artificial Intelligence)
-    at SMU in Singapore. I work on practical projects across machine learning, MLOps, statistical
-    analysis, and backend systems - with an eye toward infrastructure and solutions architecture.
+      I'm {person.firstName}, currently pursuing my Master's in AI at SMU and building systems end-to-end - data, infra, ML, backend ; the whole messy, fascinating pipeline that makes technology actually work.
     </>
   ),
 };
@@ -316,9 +314,9 @@ const about: About = {
 
 const blog: Blog = {
   path: "/blog",
-  label: "Blog",
-  title: "Writing about design and tech...",
-  description: `Read what ${person.name} has been up to recently`,
+  label: "Hobbies",
+  title: `Hobbies – ${person.name}`,
+  description: `Life outside tech: motorcycles, Magic: The Gathering, guitar, what I’m reading, and my dog.`,
   // Create new blog posts by adding a new .mdx file to app/blog/posts
   // All posts will be listed on the /blog route
 };
