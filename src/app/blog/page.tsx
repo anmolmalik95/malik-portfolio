@@ -176,7 +176,7 @@ export default function HobbiesPage() {
 
       {/* Reading */}
       <Column gap="16">
-        <Heading variant="heading-strong-l">What I am reading now</Heading>
+        <Heading variant="heading-strong-l">What I'm reading now</Heading>
 
         <Text variant="body-default-m" onBackground="neutral-weak">
           I try to always have one book going for fun and one that sharpens how
