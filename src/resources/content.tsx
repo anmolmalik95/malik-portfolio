@@ -125,7 +125,7 @@ const about: About = {
 
         <p style={{ margin: "0 0 16px 0" }}>
           <Text as="span" variant="body-default-l" onBackground="neutral-medium">
-            I am now doing my Master of IT in Business (AI) at SMU and building this portfolio to deepen my skills in
+            I am now pursuing my Master of IT in Business (AI) at SMU and building this portfolio to deepen my skills in
             Python, data, models, and infrastructure, so I can work confidently at the intersection of tech and product.
           </Text>
         </p>
