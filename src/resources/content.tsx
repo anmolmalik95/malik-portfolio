@@ -2,14 +2,14 @@ import { About, Blog, Gallery, Home, Newsletter, Person, Social, Work } from "@/
 import { Line, Logo, Row, Text } from "@once-ui-system/core";
 
 const person: Person = {
-  firstName: "Anmol",
+  firstName: "Malik",
   lastName: "Malik",
-  name: `Anmol Malik`,
+  name: `Malik`,
   role: "AI & Machine Learning · MLOps · Cloud",
   avatar: "/images/avatar.jpg",
   email: "anmolmalik@hotmail.com",
-  location: "Asia/Singapore", // Expecting the IANA time zone identifier, e.g., 'Europe/Vienna'
-  languages: ["English", "Hindi", "Punjabi", "Mandarin (Well, a little)"], // optional: Leave the array empty if you don't want to display languages
+  location: "Asia/Singapore",
+  languages: ["English", "Hindi", "Punjabi", "Mandarin (Well, a little)"],
 };
 
 const newsletter: Newsletter = {
@@ -19,9 +19,6 @@ const newsletter: Newsletter = {
 };
 
 const social: Social = [
-  // Links are automatically displayed.
-  // Import new icons in /once-ui/icons.ts
-  // Set essentials: true for links you want to show on the about page
   {
     name: "GitHub",
     icon: "github",
@@ -40,20 +37,32 @@ const social: Social = [
     link: `mailto:${person.email}`,
     essential: true,
   },
+  {
+    name: "Phone",
+    icon: "phone",
+    link: "tel:+6591458733",
+    essential: true,
+  },
+  {
+    name: "Resume",
+    icon: "file",
+    link: "/Anmol%20Resume%202025.pdf",
+    essential: true,
+  },
 ];
 
 const home: Home = {
   path: "/",
   image: "/images/og/home.jpg",
   label: "Home",
-  title: `${person.name}· AI & Machine Learning`,
+  title: `${person.name} · AI & Machine Learning`,
   description: `Projects, experiments, and writing on AI, MLOps, and data systems by ${person.name}.`,
   headline: <>Turning messy ideas into clean, deployable AI</>,
   featured: {
     display: false,
     title: (
       <Row gap="12" vertical="center">
-        <strong className="ml-4">Once UI</strong>{" "}
+        <strong className="ml-4">Once UI</strong>
         <Line background="brand-alpha-strong" vert height="20" />
         <Text marginRight="4" onBackground="brand-medium">
           Featured work
@@ -64,7 +73,8 @@ const home: Home = {
   },
   subline: (
     <>
-      I'm {person.firstName}, currently pursuing my Master's in AI at SMU and building systems end-to-end - data, infra, ML, backend ; the whole messy, fascinating pipeline that makes technology actually work.
+      I'm {person.firstName}, currently pursuing my Master's in AI at SMU and building systems end-to-end - data,
+      infra, ML, backend; the whole messy, fascinating pipeline that makes technology actually work.
     </>
   ),
 };
@@ -75,7 +85,7 @@ const about: About = {
   title: `About – ${person.name}`,
   description: `Meet ${person.name}, ${person.role} from ${person.location}`,
   tableOfContent: {
-    display: true,
+    display: false,
     subItems: false,
   },
   avatar: {
@@ -85,25 +95,104 @@ const about: About = {
     display: false,
     link: "https://cal.com",
   },
+
   intro: {
     display: true,
     title: "Introduction",
     description: (
       <>
-      Anmol is a Singapore-based AI and machine learning practitioner with a background in
-      product management and AI-driven products. He is currently pursuing the Master of IT in
-      Business (Artificial Intelligence track) at SMU, focusing on applied machine learning,
-      MLOps, and cloud infrastructure.
-      <br />
-      <br />
-      He enjoys designing systems that are not just smart on paper, but observable,
-      testable, and deployable - from statistical analysis and ML models to APIs and backend
-      services that real users can touch.
+        <p style={{ margin: "0 0 8px 0" }}>
+          <Text as="span" variant="body-default-l" onBackground="neutral-strong">
+            <strong>Hi, I'm Malik - a former business-side product manager learning to speak tech fluently.</strong>
+          </Text>
+        </p>
+
+        <p style={{ margin: "0 0 8px 0" }}>
+          <Text as="span" variant="body-default-l" onBackground="neutral-medium">
+            I spent years in boardrooms making product and commercial decisions, then walking those decisions into
+            engineering rooms and seeing the gap between intent and reality. That disconnect is what pushed me onto this
+            path.
+          </Text>
+        </p>
+
+        <p style={{ margin: "0 0 8px 0" }}>
+          <Text as="span" variant="body-default-l" onBackground="neutral-medium">
+            Across trading tech, gaming, and digital projects I have worked with traders, executives, designers, quants,
+            and developers to ship real products. At some point "translating requirements" was not enough - I wanted to
+            understand the systems myself so I could challenge assumptions on both sides.
+          </Text>
+        </p>
+
+        <p style={{ margin: "0 0 16px 0" }}>
+          <Text as="span" variant="body-default-l" onBackground="neutral-medium">
+            I am now doing my Master of IT in Business (AI) at SMU and building this portfolio to deepen my skills in
+            Python, data, models, and infrastructure, so I can work confidently at the intersection of tech and product.
+          </Text>
+        </p>
+
+        <p style={{ margin: "0 0 8px 0" }}>
+          <Text as="span" variant="body-default-l" onBackground="neutral-strong">
+            <strong>What I'm good at</strong>
+          </Text>
+        </p>
+        
+        <ul style={{ margin: "0 0 16px 20px" }}>
+          <li style={{ marginBottom: "6px" }}>
+            <Text as="span" variant="body-default-l" onBackground="neutral-medium">
+              <strong>Simplifying fuzzy problems.</strong> I take vague, high-level ideas and turn them into something a
+              team can design, build, and measure.
+            </Text>
+          </li>
+          <li style={{ marginBottom: "6px" }}>
+            <Text as="span" variant="body-default-l" onBackground="neutral-medium">
+              <strong>Keeping people aligned.</strong> I have spent years coordinating stakeholders and making sure what
+              ships actually matches business goals.
+            </Text>
+          </li>
+          <li style={{ marginBottom: "6px" }}>
+            <Text as="span" variant="body-default-l" onBackground="neutral-medium">
+              <strong>Holding context and detail.</strong> I care about why the business cares and how the system works,
+              so nothing important gets lost between leadership and engineering.
+            </Text>
+          </li>
+        </ul>
+
+        <p style={{ margin: "0 0 8px 0" }}>
+          <Text as="span" variant="body-default-l" onBackground="neutral-strong">
+            <strong>Why this site exists</strong>
+          </Text>
+        </p>
+        
+        <p style={{ margin: "0 0 8px 0" }}>
+          <Text as="span" variant="body-default-l" onBackground="neutral-medium">
+            On my CV, I look like a product manager. Here, I want you to see that I can also build things - write code,
+            design systems, and work with AI and infrastructure with enough depth to be useful to an engineering team.
+          </Text>
+        </p>
+        
+        <ul style={{ margin: "0 0 0 20px" }}>
+          <li style={{ marginBottom: "6px" }}>
+            <Text as="span" variant="body-default-l" onBackground="neutral-medium">
+              I understand roadmaps, stakeholders, and commercial outcomes.
+            </Text>
+          </li>
+          <li style={{ marginBottom: "6px" }}>
+            <Text as="span" variant="body-default-l" onBackground="neutral-medium">
+              I am actively building the technical fundamentals to contribute as an engineer-in-training.
+            </Text>
+          </li>
+          <li style={{ marginBottom: "6px" }}>
+            <Text as="span" variant="body-default-l" onBackground="neutral-medium">
+              I want to be the bridge your engineers and leadership trust when things are complex or ambiguous.
+            </Text>
+          </li>
+        </ul>
       </>
     ),
   },
+
   work: {
-    display: true, // set to false to hide this section
+    display: false,
     title: "Work Experience",
     experiences: [
       {
@@ -111,30 +200,12 @@ const about: About = {
         timeframe: "Jul 2024 – Jul 2025",
         role: "Product Manager, AI & ML Systems",
         achievements: [
-          <>
-            Delivered product roadmaps for hedge-fund ML engines (MidasAI, AlphaPilot), an AI OMS (QuantHare),
-            and an automotive intelligence platform (Vittori).
-          </>,
-          <>
-            Drove cross-functional execution across UI/UX, ML engineers, quants, and backend teams to ship
-            AI-driven product milestones.
-          </>,
-          <>
-            Evaluated trading strategies using Sharpe, Sortino, and drawdown metrics to assess model readiness for
-            deployment under client-specific risk profiles.
-          </>,
-          <>
-            Coordinated TradeGPT (LLM) development — PRDs, backlog, sprint alignment, feature delivery, and
-            evaluation of model behaviour/quality.
-          </>,
-          <>
-            Established internal AI governance frameworks, enabling transparent model performance reporting,
-            risk visibility, and traceable decision-making.
-          </>,
-          <>
-            Led productisation of QuantHare by defining functional requirements, technical workflows, and UI/UX
-            for a client-grade proof of concept.
-          </>,
+          "Delivered product roadmaps for hedge-fund ML engines (MidasAI, AlphaPilot), an AI OMS (QuantHare), and an automotive intelligence platform (Vittori).",
+          "Drove cross-functional execution across UI/UX, ML engineers, quants, and backend teams to ship AI-driven product milestones.",
+          "Evaluated trading strategies using Sharpe, Sortino, and drawdown metrics to assess model readiness for deployment under client-specific risk profiles.",
+          "Coordinated TradeGPT (LLM) development - PRDs, backlog, sprint alignment, feature delivery, and evaluation of model behaviour and quality.",
+          "Established internal AI governance frameworks, enabling transparent model performance reporting, risk visibility, and traceable decision-making.",
+          "Led productisation of QuantHare by defining functional requirements, technical workflows, and UI/UX for a client-grade proof of concept.",
         ],
         images: [],
       },
@@ -143,25 +214,10 @@ const about: About = {
         timeframe: "May 2022 – Apr 2024",
         role: "Product Manager, Games & Content",
         achievements: [
-          <>
-            Owned full product lifecycle for APAC casino products — concept, requirements, launch, analysis, and
-            continuous iteration.
-          </>,
-          <>
-            Improved delivery velocity by 2× across the regional slot-games portfolio by redesigning workflow and
-            cross-functional coordination.
-          </>,
-          <>
-            Partnered with engineering, art, math, and vendor teams to ship new content on predictable timelines.
-          </>,
-          <>
-            Built data-driven bet-setting and retention frameworks, contributing to +8% revenue lift and 20%
-            improvement in early-game uptake.
-          </>,
-          <>
-            Represented APAC product expertise at industry events and seminars, presenting game analytics and
-            performance trends.
-          </>,
+          "Owned full product lifecycle for APAC casino products - concept, requirements, launch, analysis, and continuous iteration.",
+          "Improved delivery velocity across the regional slot-games portfolio by redesigning workflow and cross-functional coordination.",
+          "Partnered with engineering, art, math, and vendor teams to ship new content on predictable timelines.",
+          "Built data-driven bet-setting and retention frameworks contributing to revenue lift and improved early-game uptake.",
         ],
         images: [],
       },
@@ -170,69 +226,62 @@ const about: About = {
         timeframe: "Mar 2020 – Mar 2021",
         role: "Junior Project Manager",
         achievements: [
-          <>
-            Implemented Jira workflows for enterprise clients (Dyson, Adidas, Parkway), improving project visibility
-            and cross-team coordination.
-          </>,
-          <>
-            Managed invoicing and time-tracking for a 40-person regional team across multi-country campaigns.
-          </>,
-        ],
-        images: [],
-      },
-      {
-        company: "Early Career Roles",
-        timeframe: "2017 – 2019",
-        role: "Project & Operations Support",
-        achievements: [
-          <>
-            Supported project management workflows across marketing and operations roles at That Marketing Guy
-            and Apostrophe Collective.
-          </>,
-          <>
-            Developed early experience in stakeholder communication, execution support, and operational
-            coordination.
-          </>,
+          "Implemented Jira workflows for enterprise clients (Dyson, Adidas, Parkway), improving project visibility and cross-team coordination.",
+          "Managed invoicing and time-tracking for a regional team across multi-country campaigns.",
         ],
         images: [],
       },
     ],
   },
+
   studies: {
-    display: true, // set to false to hide this section
+    display: true,
     title: "Education",
     institutions: [
       {
         name: "Singapore Management University (SMU)",
-        description: <>Master of IT in Business (Artificial Intelligence Track)
-        <br />  <br />
-          Applied machine learning, statistical modelling, query optimisation,  
-          algorithm design, MLOps fundamentals, and AI deployment workflows.</>,
+        description: (
+          <>
+            Master of IT in Business (Artificial Intelligence Track)
+            <br />
+            <br />
+            Applied machine learning, statistical modelling, query optimisation, algorithm design, MLOps fundamentals,
+            and AI deployment workflows.
+          </>
+        ),
       },
       {
         name: "Murdoch University, Western Australia",
-        description: <>Bachelor of Marketing & Business Law
-        <br />  <br />
-          Consumer behaviour, analytics, strategic communication, and commercial legal frameworks.</>,
+        description: (
+          <>
+            Bachelor of Marketing & Business Law
+            <br />
+            <br />
+            Consumer behaviour, analytics, strategic communication, and commercial legal frameworks.
+          </>
+        ),
       },
       {
         name: "Singapore Institute of Management (SIM)",
-        description: <>Diploma in Management Studies
-        <br />  <br />
-          Management fundamentals, business analytics, and organisational processes.</>,
+        description: (
+          <>
+            Diploma in Management Studies
+            <br />
+            <br />
+            Management fundamentals, business analytics, and organisational processes.
+          </>
+        ),
       },
     ],
   },
+
   technical: {
-    display: true, // set to false to hide this section
+    display: true,
     title: "Technical skills",
     skills: [
       {
         title: "Python & Machine Learning",
-        description: (
-          <>
-          </>
-        ),
+        description: <></>,
         tags: [
           { name: "Python", icon: "python" },
           { name: "pandas", icon: "python" },
@@ -243,10 +292,7 @@ const about: About = {
       },
       {
         title: "Statistics & Data Modelling",
-        description: (
-          <>
-          </>
-        ),
+        description: <></>,
         tags: [
           { name: "Statistics", icon: "chart" },
           { name: "EDA", icon: "chart" },
@@ -256,10 +302,7 @@ const about: About = {
       },
       {
         title: "APIs, Backend & Deployment",
-        description: (
-          <>
-          </>
-        ),
+        description: <></>,
         tags: [
           { name: "FastAPI", icon: "api" },
           { name: "REST", icon: "api" },
@@ -270,10 +313,7 @@ const about: About = {
       },
       {
         title: "Databases & Query Optimisation",
-        description: (
-          <>
-          </>
-        ),
+        description: <></>,
         tags: [
           { name: "SQL", icon: "database" },
           { name: "Query Optimisation", icon: "database" },
@@ -283,10 +323,7 @@ const about: About = {
       },
       {
         title: "MLOps Foundations & Engineering Workflow",
-        description: (
-          <>
-          </>
-        ),
+        description: <></>,
         tags: [
           { name: "Git", icon: "github" },
           { name: "CI/CD", icon: "github" },
@@ -296,10 +333,7 @@ const about: About = {
       },
       {
         title: "Cloud Platforms & Serverless Deployment",
-        description: (
-          <>
-          </>
-        ),
+        description: <></>,
         tags: [
           { name: "AWS (Exposure)", icon: "cloud" },
           { name: "Azure (Exposure)", icon: "cloud" },
@@ -307,7 +341,7 @@ const about: About = {
           { name: "Vercel", icon: "cloud" },
         ],
         images: [],
-      },      
+      },
     ],
   },
 };
@@ -316,9 +350,7 @@ const blog: Blog = {
   path: "/blog",
   label: "Hobbies",
   title: `Hobbies – ${person.name}`,
-  description: `Life outside tech: motorcycles, Magic: The Gathering, guitar, what I’m reading, and my dog.`,
-  // Create new blog posts by adding a new .mdx file to app/blog/posts
-  // All posts will be listed on the /blog route
+  description: `Life outside tech: motorcycles, Magic: The Gathering, guitar, what I'm reading, and my dog.`,
 };
 
 const work: Work = {
@@ -326,8 +358,6 @@ const work: Work = {
   label: "Work",
   title: `Projects – ${person.name}`,
   description: `Design and dev projects by ${person.name}`,
-  // Create new project pages by adding a new .mdx file to app/blog/posts
-  // All projects will be listed on the /home and /work routes
 };
 
 const gallery: Gallery = {
@@ -335,8 +365,6 @@ const gallery: Gallery = {
   label: "Gallery",
   title: `Photo gallery – ${person.name}`,
   description: `A photo collection by ${person.name}`,
-  // Images by https://lorant.one
-  // These are placeholder images, replace with your own
   images: [
     {
       src: "/images/gallery/horizontal-1.jpg",

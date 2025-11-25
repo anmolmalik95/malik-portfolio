@@ -51,7 +51,11 @@ export default function About() {
     },
   ];
   return (
-    <Column maxWidth="m" className="page-animate">
+    <Column maxWidth="m"
+      paddingTop="24"
+      paddingBottom="48"
+      gap="48"
+      className="page-animate">
       <Schema
         as="webPage"
         baseURL={baseURL}
@@ -95,7 +99,7 @@ export default function About() {
           >
             <Avatar src={person.avatar} size="xl" />
             <Row gap="8" vertical="center">
-              <Icon onBackground="accent-weak" name="globe" />
+              {/* <Icon onBackground="accent-weak" name="globe" /> */}
               {person.location}
             </Row>
             {person.languages && person.languages.length > 0 && (
@@ -109,13 +113,13 @@ export default function About() {
             )}
           </Column>
         )}
-        <Column className={styles.blockAlign} flex={9} maxWidth={40}>
+        <Column className={styles.blockAlign} flex={9} maxWidth="m" gap="32">
           <Column
             id={about.intro.title}
             fillWidth
             minHeight="160"
             vertical="center"
-            marginBottom="32"
+            marginBottom="4"
           >
             {about.calendar.display && (
               <Row
@@ -197,7 +201,7 @@ export default function About() {
           </Column>
 
           {about.intro.display && (
-            <Column textVariant="body-default-l" fillWidth gap="m" marginBottom="xl">
+            <Column textVariant="body-default-l" fillWidth gap="m" marginBottom="8">
               {about.intro.description}
             </Column>
           )}

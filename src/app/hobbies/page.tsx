@@ -15,7 +15,7 @@ export async function generateMetadata() {
     description: blog.description,
     baseURL: baseURL,
     image: blog.image,
-    path: blog.path,
+    path: "/hobbies",
   });
 }
 
@@ -32,7 +32,7 @@ export default function HobbiesPage() {
       <Schema
         as="webPage"
         baseURL={baseURL}
-        path={blog.path}
+        path={"/hobbies"}
         title={blog.title}
         description={blog.description}
         image={blog.image}
@@ -52,9 +52,9 @@ export default function HobbiesPage() {
           variant="body-default-l"
           onBackground="neutral-weak"
         >
-          When I am not staring at a terminal or a slide deck, this is what I am
-          usually up to. These are the things that keep me grounded and remind
-          me there is more to life than latency and grades.
+          A look at what I do when I’m not building ML systems, debugging APIs,
+          or studying. These are the hobbies that keep me grounded, curious,
+          and human.
         </Text>
       </Column>
 
@@ -64,11 +64,10 @@ export default function HobbiesPage() {
         <Column gap="12">
           <Heading variant="heading-strong-m">Riding motorcycles</Heading>
           <Text variant="body-default-m" onBackground="neutral-weak">
-            Riding is the easiest way for me to get out of my own head. The road
-            forces you to pay attention to what is right in front of you, and
-            the bike gives you immediate feedback for every small decision you
-            make. It's focused, steady, and a kind of peace you can't really get
-            anywhere else.
+            I ride because it clears my head. There’s something very satisfying
+            about being fully present on the road, paying attention to the small
+            details, and covering distance one kilometre at a time. It’s my
+            favourite way to reset after long stretches of work or study.
           </Text>
 
           <Row className="hobbies-image-row">
@@ -93,13 +92,14 @@ export default function HobbiesPage() {
 
         {/* Wrenching */}
         <Column gap="12">
-          <Heading variant="heading-strong-m">Wrenching &amp; volunteering</Heading>
+          <Heading variant="heading-strong-m">Wrenching & volunteering</Heading>
           <Text variant="body-default-m" onBackground="neutral-weak">
-            On some weekends, I help out at a local motorcycle workshop. It's
-            unpaid and mostly unglamorous: changing oil, cleaning parts, holding
-            fairings in place, sweeping the floor. It's physically tiring work
-            that gives me a real respect for the people who do it every day, but
-            I never leave the workshop without a smile.
+            On the weekends, I volunteer at a local motorcycle workshop – unpaid –
+            mainly to learn and to be around people who genuinely love bikes.
+            I help with basic servicing, small repairs, and the unglamorous
+            tasks that still matter if you want machines to be safe and reliable.
+            It taught me a lot about patience, responsibility, and how much
+            trust people place in whoever works on their bike.
           </Text>
 
           <Row className="hobbies-image-row">
@@ -123,13 +123,13 @@ export default function HobbiesPage() {
         </Column>
       </Column>
 
-      {/* DOG */}
+      {/* 🐕 DOG */}
       <Column gap="16">
         <Heading variant="heading-strong-l">Maya the dog</Heading>
         <Text variant="body-default-m" onBackground="neutral-weak">
-          When I'm not on a bike or in front of a screen, I'm probably hanging out with my
-          dog, Maya. She has a talent for dragging me outdoors, getting me
-          moving, and reminding me to keep things simple; in the best ways.
+          When I’m not on a bike or in front of a screen, I’m usually hanging
+          out with my dog. She’s an excellent reminder to touch grass, keep a
+          routine, and not take myself too seriously.
         </Text>
 
         <Row className="hobbies-image-row">
@@ -156,10 +156,11 @@ export default function HobbiesPage() {
       <Column gap="12">
         <Heading variant="heading-strong-l">Magic: The Gathering</Heading>
         <Text variant="body-default-m" onBackground="neutral-weak">
-          I've played Magic on and off for years. I enjoy the strategic side:
-          building decks, thinking in probabilities, and making small decisions
-          that still fit into a larger gameplan. It is a nice mix of
-          problem-solving and social time, with zero real-world stakes attached.
+          I’ve played Magic on and off for years. I enjoy the strategy side of
+          it: tuning decks, thinking in probabilities, and trying to navigate
+          long matchups without throwing the game away. It scratches a similar
+          itch to optimisation and debugging – except the worst that happens is
+          you lose a match, not a production system.
         </Text>
       </Column>
 
@@ -167,24 +168,22 @@ export default function HobbiesPage() {
       <Column gap="16">
         <Heading variant="heading-strong-l">Guitar</Heading>
         <Text variant="body-default-m" onBackground="neutral-weak">
-          I'm very much a bedroom guitarist. I mostly play for myself late at
-          night or in between tasks, learning songs I like, messing around with
-          tones, and recording the occasional cover track. It's one of the easiest
-          ways for me to unwind after a long day.
+          I’m a bedroom guitarist – I mostly play for myself, late at night or
+          between tasks. A lot of it is learning songs I like, experimenting with
+          tones, and occasionally recording little ideas. It’s one of the few
+          hobbies that consistently puts me into “flow”.
         </Text>
       </Column>
 
-      {/* Reading */}
+      {/* Reading — book covers */}
       <Column gap="16">
-        <Heading variant="heading-strong-l">What I am reading now</Heading>
+        <Heading variant="heading-strong-l">What I’m reading now</Heading>
 
         <Text variant="body-default-m" onBackground="neutral-weak">
-          I try to always have one book going for fun and one that sharpens how
-          I think. The mix changes over time, but reading is one habit I keep
-          coming back to.
+          I try to always read one book for fun and one that sharpens how I think.
         </Text>
 
-        {/* Book covers */}
+        {/* Plain flex layout so captions are perfectly centred under each cover */}
         <div
           style={{
             display: "flex",
