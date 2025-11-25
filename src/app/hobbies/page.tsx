@@ -272,7 +272,7 @@ export default function HobbiesPage() {
                   lineHeight: 1.4,
                 }}
               >
-                <strong>Algorithms Illuminated (Part 1)</strong>
+                <strong>Algorithms Illuminated (Part 2)</strong>
                 <br />
                 Tim Roughgarden
               </p>

@@ -60,9 +60,9 @@ export default function HobbiesPage() {
 
       {/* MOTORCYCLES */}
       <Column gap="24">
-        {/* Riding motorcycles */}
+        {/* Riding Motorcycles */}
         <Column gap="12">
-          <Heading variant="heading-strong-m">Riding motorcycles</Heading>
+          <Heading variant="heading-strong-m">Riding Motorcycles</Heading>
           <Text variant="body-default-m" onBackground="neutral-weak">
             Riding is the easiest way for me to get out of my own head. The road
             forces you to pay attention to what is right in front of you, and
@@ -93,7 +93,7 @@ export default function HobbiesPage() {
 
         {/* Wrenching */}
         <Column gap="12">
-          <Heading variant="heading-strong-m">Wrenching &amp; volunteering</Heading>
+          <Heading variant="heading-strong-m">Wrenching &amp; Volunteering</Heading>
           <Text variant="body-default-m" onBackground="neutral-weak">
             On some weekends, I help out at a local motorcycle workshop. It's
             unpaid and mostly unglamorous: changing oil, cleaning parts, holding
@@ -125,7 +125,7 @@ export default function HobbiesPage() {
 
       {/* DOG */}
       <Column gap="16">
-        <Heading variant="heading-strong-l">Maya the dog</Heading>
+        <Heading variant="heading-strong-l">Maya the Dog</Heading>
         <Text variant="body-default-m" onBackground="neutral-weak">
           When I'm not on a bike or in front of a screen, I'm probably hanging out with my
           dog, Maya. She has a talent for dragging me outdoors, getting me
@@ -176,7 +176,7 @@ export default function HobbiesPage() {
 
       {/* Reading */}
       <Column gap="16">
-        <Heading variant="heading-strong-l">What I'm reading now</Heading>
+        <Heading variant="heading-strong-l">What I'm Reading Now</Heading>
 
         <Text variant="body-default-m" onBackground="neutral-weak">
           I try to always have one book going for fun and one that sharpens how

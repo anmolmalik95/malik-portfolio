@@ -13,36 +13,51 @@ team:
 ---
 
 ## Overview
+<Row gap="16" wrap horizontal="start" paddingY="8">
+  <Button
+    href="https://motorcycle-risk-prediction-api.onrender.com/docs#/risk/predict_api_v1_risk_predict_risk_post"
+    label="Live demo"
+    prefixIcon="arrowUpRight"
+    variant="secondary"
+    size="m"
+    className="demo-button"
+  />
+
+  <Button
+    href="https://github.com/anmolmalik95/motorcycle-risk-prediction-api"
+    label="View on GitHub"
+    prefixIcon="github"
+    variant="secondary"
+    size="m"
+  />
+</Row>
 
 This project exposes a machine learning model as a production-style REST API that estimates **risk levels for a motorcycle ride** given contextual features (weather, distance, visibility, time of day, and rider experience).
 
 The goal was to go beyond a local notebook model and build something closer to what an engineer would ship:
 a **reproducible pipeline**, a **clean FastAPI service**, and a **cloud deployment** with live documentation.
 
-The project is fully open-source and available on GitHub:
 
-- **GitHub:** [LINK](https://github.com/anmolmalik95/motorcycle-risk-prediction-api)  
-- **Live Demo:** [Render](https://motorcycle-risk-prediction-api.onrender.com/docs#/risk/predict_api_v1_risk_predict_risk_post)
 
----
+<details>
+<summary><strong>Problem Framing</strong></summary>
 
-## Problem Framing
+Motorcyclists routinely make ride/no-ride decisions under uncertainty: changing weather, distance, visibility, time of day, and their own skill level.
 
-Motorcyclists routinely make ride/no-ride decisions under uncertainty: changing weather, distance, visibility, time of day, and their own skill level.  
-
-Instead of hand-wavy “it looks risky”, this project asks:
+Instead of hand-wavy "it looks risky", this project asks:
 
 > *Given a set of riding conditions, what is the predicted risk level for this ride?*
 
 The API returns a **numerical risk score** (and interpretable categories) that can be used for:
 
-- Pre-ride decision support (“Should I still ride?”)
-- Scenario analysis (“What if I leave earlier / later?”)
-- Education (“How much does rain or low visibility really affect risk?”)
+- Pre-ride decision support ("Should I still ride?")
+- Scenario analysis ("What if I leave earlier / later?")
+- Education ("How much does rain or low visibility really affect risk?")
 
----
+</details>
 
-## Data & Features
+<details>
+<summary><strong>Data & Features</strong></summary>
 
 The model is trained on a structured dataset representing ride conditions and outcomes.  
 The core features include:
@@ -57,9 +72,10 @@ The core features include:
 
 The dataset uses a mix of **synthetic and realistically-inspired patterns**, designed to reflect plausible relationships between conditions and risk while remaining fully anonymised and safe to share.
 
----
+</details>
 
-## Modelling Approach
+<details>
+<summary><strong>Modelling Approach</strong></summary>
 
 The project uses a classic supervised learning setup:
 
@@ -75,9 +91,10 @@ The project uses a classic supervised learning setup:
 
 The emphasis is not on squeezing out the last 0.5% of performance, but on **clean structure**, **reproducibility**, and **serving the model in a realistic way**.
 
----
+</details>
 
-## API Design & Implementation
+<details>
+<summary><strong>API Design & Implementation</strong></summary>
 
 The model is served via a **FastAPI** application, exposing a simple, well-typed endpoint:
 
@@ -99,9 +116,10 @@ The live docs are available here:
 
 - https://motorcycle-risk-prediction-api.onrender.com/docs#/risk/predict_api_v1_risk_predict_risk_post
 
----
+</details>
 
-## Deployment
+<details>
+<summary><strong>Deployment</strong></summary>
 
 The API is deployed on **Render**, using:
 
@@ -117,12 +135,12 @@ This mimics a **realistic ML deployment path**:
 4. Deploy to a managed cloud service
 5. Verify via live docs and test calls
 
----
+</details>
 
-## Example Usage
+<details>
+<summary><strong>Example Usage</strong></summary>
 
 A typical request to the API looks like:
-
 ```json
 {
   "temp": 30,
@@ -132,3 +150,6 @@ A typical request to the API looks like:
   "time_of_day": "night",
   "experience": "beginner"
 }
+```
+
+</details>

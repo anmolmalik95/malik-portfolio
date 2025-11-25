@@ -46,7 +46,7 @@ const social: Social = [
   {
     name: "Resume",
     icon: "file",
-    link: "/Anmol%20Resume%202025.pdf",
+    link: "/malik_Resume_2025.pdf",
     essential: true,
   },
 ];
@@ -166,7 +166,7 @@ const about: About = {
         <p style={{ margin: "0 0 8px 0" }}>
           <Text as="span" variant="body-default-l" onBackground="neutral-medium">
             On my CV, I look like a product manager. Here, I want you to see that I can also build things - write code,
-            design systems, and work with AI and infrastructure with enough depth to be useful to an engineering team.
+            design systems, and work with AI and infrastructure with enough depth to deliver value to an engineering team.
           </Text>
         </p>
         

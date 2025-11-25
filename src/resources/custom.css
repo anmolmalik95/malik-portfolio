@@ -195,3 +195,193 @@
   display: block;
 }
 
+details {
+  border: 1px solid var(--neutral-alpha-medium);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: var(--neutral-background-medium) !important;
+}
+
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.1em;
+  margin: -16px;
+  padding: 16px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+  list-style: none; /* Removes default arrow */
+}
+
+/* Remove default arrow in WebKit browsers */
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+details {
+  border: 1px solid var(--neutral-alpha-medium);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: var(--neutral-alpha-weak);
+}
+
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.1em;
+  margin: -16px;
+  padding: 16px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+  list-style: none;
+}
+
+/* Remove default arrow in all browsers */
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+details summary::marker {
+  display: none;
+}
+
+details {
+  border: 1px solid var(--neutral-alpha-medium);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: var(--neutral-alpha-weak);
+}
+
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.1em;
+  margin: -16px;
+  padding: 16px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+  list-style: none;
+  display: flex;
+  align-items: center;
+}
+
+/* Remove default arrow in all browsers */
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+details summary::marker {
+  display: none;
+}
+
+details {
+  border: 1px solid var(--neutral-alpha-medium);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: var(--neutral-alpha-weak);
+}
+
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.1em;
+  margin: -16px;
+  padding: 16px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+  list-style: none;
+  display: flex;
+  align-items: center;
+}
+
+/* Remove default arrow in all browsers */
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+details summary::marker {
+  display: none;
+}
+
+details {
+  border: 1px solid var(--neutral-alpha-medium);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: var(--neutral-alpha-weak);
+}
+
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.1em;
+  margin: -16px;
+  padding: 12px 16px !important;  /* Reduced from 16px */
+  border-radius: 8px;
+  transition: background 0.2s ease;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  line-height: 1.2 !important;
+  min-height: 0 !important;
+}
+
+/* Remove default arrow in all browsers */
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+details summary::marker {
+  display: none;
+}
+
+/* Add custom chevron arrow */
+details summary::before {
+  content: "›";
+  display: inline-block;
+  margin-right: 8px;
+  transition: transform 0.2s ease;
+  font-size: 1.5em !important;  /* Reduced from 1.8em */
+  font-weight: normal;
+  flex-shrink: 0;
+  transform: translateY(-2px) !important;  /* Reduced from -3px */
+}
+
+details[open] summary::before {
+  transform: translateY(-3px) rotate(90deg);
+}
+
+details summary:hover {
+  background: var(--neutral-alpha-medium);
+}
+
+details[open] summary {
+  margin-bottom: 0;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--neutral-alpha-medium);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+details summary strong {
+  font-weight: 600;
+}
+
+/* Content wrapper to handle spacing */
+details > *:not(summary) {
+  margin-top: 16px;
+}
+
+.demo-button {
+  background: var(--neutral-alpha-weak) !important;
+  color: var(--neutral-on-background-strong) !important;
+  border: 1px solid var(--neutral-alpha-medium) !important;
+}
+
+.demo-button:hover {
+  background: var(--neutral-alpha-medium) !important;
+}
