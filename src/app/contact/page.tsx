@@ -13,7 +13,7 @@ export default function ContactPage() {
     <Row
       as="section"
       fillWidth
-      paddingY="96"
+      paddingY="64"
       paddingX="16"
       horizontal="center"
       vertical="center"
@@ -39,7 +39,7 @@ export default function ContactPage() {
             style={{ textAlign: "center" }}
         >
             I’m currently looking for a{" "}
-            <strong>6-month, credit-bearing internship starting April 2026</strong>
+            <strong>6-month, credit-bearing internship starting April 2026 </strong>
             - ideally in AI, machine learning, infrastructure, or
             engineering-focused roles.
             <br /><br />
