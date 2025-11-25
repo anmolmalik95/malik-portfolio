@@ -55,6 +55,7 @@ export default function ContactPage() {
           <Button
             href={`mailto:${person.email}`}
             label="Email me"
+            prefixIcon="email"
             variant="secondary"
             size="m"
           />
@@ -62,6 +63,7 @@ export default function ContactPage() {
           <Button
             href="https://linkedin.com/in/anmolmalik"
             label="Connect on LinkedIn"
+            prefixIcon="linkedin"
             variant="secondary"
             size="m"
           />
@@ -77,15 +79,15 @@ export default function ContactPage() {
           <Button
             href="https://wa.me/6591458733"
             label="WhatsApp me"
-            prefixIcon="chat"
+            prefixIcon="whatsapp"
             variant="secondary"
             size="m"
           />
         </Row>
 
         {/* Phone number text */}
-        <Text variant="body-default-s" onBackground="neutral-weak">
-          Mobile: <strong>+65 9145 8733</strong>
+        <Text variant="body-default-m" onBackground="neutral-weak">
+          or just use: <strong>anmolmalik@hotmail.com / +65 9145 8733</strong>
         </Text>
       </Column>
     </Row>
