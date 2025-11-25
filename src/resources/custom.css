@@ -112,31 +112,6 @@
 .hobbies-image-card--tall img {
   object-fit: contain;
 }
-.hobbies-image-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.hobbies-image-card {
-  flex: 1 1 260px;
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-.hobbies-image-card img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.hobbies-image-card--small {
-  max-width: 360px;
-}
-
-.hobbies-image-card--tall img {
-  object-fit: contain;
-}
 
 .hobbies-book-card {
   flex: 0 1 300px;
@@ -144,31 +119,6 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-}
-.hobbies-image-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.hobbies-image-card {
-  flex: 1 1 260px;
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-.hobbies-image-card img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.hobbies-image-card--small {
-  max-width: 360px;
-}
-
-.hobbies-image-card--tall img {
-  object-fit: contain;
 }
 
 .hobbies-book-row-left {
@@ -208,119 +158,7 @@ details summary {
   font-weight: 600;
   font-size: 1.1em;
   margin: -16px;
-  padding: 16px;
-  border-radius: 8px;
-  transition: background 0.2s ease;
-  list-style: none; /* Removes default arrow */
-}
-
-/* Remove default arrow in WebKit browsers */
-details summary::-webkit-details-marker {
-  display: none;
-}
-
-details {
-  border: 1px solid var(--neutral-alpha-medium);
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
-  background: var(--neutral-alpha-weak);
-}
-
-details summary {
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 1.1em;
-  margin: -16px;
-  padding: 16px;
-  border-radius: 8px;
-  transition: background 0.2s ease;
-  list-style: none;
-}
-
-/* Remove default arrow in all browsers */
-details summary::-webkit-details-marker {
-  display: none;
-}
-
-details summary::marker {
-  display: none;
-}
-
-details {
-  border: 1px solid var(--neutral-alpha-medium);
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
-  background: var(--neutral-alpha-weak);
-}
-
-details summary {
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 1.1em;
-  margin: -16px;
-  padding: 16px;
-  border-radius: 8px;
-  transition: background 0.2s ease;
-  list-style: none;
-  display: flex;
-  align-items: center;
-}
-
-/* Remove default arrow in all browsers */
-details summary::-webkit-details-marker {
-  display: none;
-}
-
-details summary::marker {
-  display: none;
-}
-
-details {
-  border: 1px solid var(--neutral-alpha-medium);
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
-  background: var(--neutral-alpha-weak);
-}
-
-details summary {
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 1.1em;
-  margin: -16px;
-  padding: 16px;
-  border-radius: 8px;
-  transition: background 0.2s ease;
-  list-style: none;
-  display: flex;
-  align-items: center;
-}
-
-/* Remove default arrow in all browsers */
-details summary::-webkit-details-marker {
-  display: none;
-}
-
-details summary::marker {
-  display: none;
-}
-
-details {
-  border: 1px solid var(--neutral-alpha-medium);
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
-  background: var(--neutral-alpha-weak);
-}
-
-details summary {
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 1.1em;
-  margin: -16px;
-  padding: 12px 16px !important;  /* Reduced from 16px */
+  padding: 12px 16px !important;
   border-radius: 8px;
   transition: background 0.2s ease;
   list-style: none;
@@ -345,14 +183,14 @@ details summary::before {
   display: inline-block;
   margin-right: 8px;
   transition: transform 0.2s ease;
-  font-size: 1.5em !important;  /* Reduced from 1.8em */
+  font-size: 1.5em !important;
   font-weight: normal;
   flex-shrink: 0;
-  transform: translateY(-2px) !important;  /* Reduced from -3px */
+  transform: translateY(-2px) !important;
 }
 
 details[open] summary::before {
-  transform: translateY(-3px) rotate(90deg);
+  transform: translateY(-3px) rotate(90deg) !important;
 }
 
 details summary:hover {
