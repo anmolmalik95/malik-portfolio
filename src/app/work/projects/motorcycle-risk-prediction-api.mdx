@@ -143,12 +143,26 @@ This mimics a **realistic ML deployment path**:
 A typical request to the API looks like:
 ```json
 {
-  "temp": 30,
-  "rainfall": 0.4,
-  "visibility": 5,
-  "distance": 80,
+  "temperature": 30,
+  "rainfall": 200,
+  "visibility": 50,
+  "distance": 2000,
   "time_of_day": "night",
-  "experience": "beginner"
+  "experience": 10
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Example Output</strong></summary>
+
+A typical response from the API looks like:
+```json
+{
+  "risk_score": 0.467,
+  "risk_level": "Medium",
+  "advice": "Rain is increasing your risk. Consider waiting for the rain to ease or reducing your speed significantly. Overall risk is moderate; ride defensively and give yourself extra margin for error."
 }
 ```
 
