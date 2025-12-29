@@ -1,0 +1,140 @@
+---
+title: "Production Hardening a Machine Learning API"
+publishedAt: "2025-12-09"
+summary: "A second-phase engineering project focused on containerisation, testing, CI, and deployment reliability for an existing ML-powered FastAPI service."
+images:
+  - "/images/projects/motorcycle-risk/cover-02.png"
+team:
+  - name: "Anmol Malik"
+    role: "AI & ML · MLOps · Cloud"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/malikanmol/"
+    link: "https://github.com/anmolmalik95/motorcycle-risk-prediction-api"
+---
+
+## Overview
+<Row gap="16" wrap horizontal="start" paddingY="8">
+  <Button
+    href="https://motorcycle-risk-api-docker.onrender.com"
+    label="Live Docker Deployment"
+    prefixIcon="arrowUpRight"
+    variant="secondary"
+    size="m"
+    className="demo-button"
+  />
+
+  <Button
+    href="https://github.com/anmolmalik95/motorcycle-risk-prediction-api"
+    label="View on GitHub"
+    prefixIcon="github"
+    variant="secondary"
+    size="m"
+  />
+
+  <Button
+    href="https://motorcycle-risk-prediction-api.onrender.com/docs"
+    label="Original ML API Project"
+    prefixIcon="arrowUpRight"
+    variant="secondary"
+    size="m"
+  />
+</Row>
+
+This project represents a **second phase** of an ML-powered REST API I previously built and deployed, focusing on the **engineering work required to make the service production-ready**.
+
+The model and API behaviour are unchanged. Instead, the service has been containerised with Docker, validated by automated tests, and guarded by a GitHub Actions CI pipeline. The same Docker image is built locally, in CI, and deployed to the cloud with environment-driven configuration and health checks.
+
+The goal was to move from *“this works”* to *“this can be safely shipped and maintained.”*
+
+For the original modelling and API details, please see:  
+[Motorcycle Risk Prediction API (ML & FastAPI)](/work/motorcycle-risk-prediction-api)
+
+---
+
+<details>
+  <summary><strong>Problem Framing</strong></summary>
+
+  <p>
+    Once an ML model is exposed via an API, correctness alone is not enough.
+  </p>
+
+  <p>
+    Without reproducible builds, automated validation, and consistent deployment environments, even a working model can become fragile over time.
+  </p>
+
+  <p>
+    This phase reframes the problem as:
+  </p>
+
+  <blockquote>
+    <em>How do we make an existing ML API reliable as it evolves?</em>
+  </blockquote>
+</details>
+
+<details>
+  <summary><strong>Data &amp; Features</strong></summary>
+
+  <p>
+    The data schema and feature set are unchanged from the original project.
+  </p>
+
+  <p>
+    By leaving data and features untouched, this phase isolates <strong>delivery and operational concerns</strong> from modelling work.
+  </p>
+</details>
+
+<details>
+  <summary><strong>Modelling Approach</strong></summary>
+
+  <p>
+    The modelling approach remains unchanged:
+  </p>
+
+  <ul>
+    <li>Random Forest model (scikit-learn)</li>
+    <li>Trained offline</li>
+    <li>Loaded from a persisted artefact at runtime</li>
+  </ul>
+
+  <p>
+    No retraining or tuning was performed in this phase.
+  </p>
+</details>
+
+<details>
+  <summary><strong>API Design &amp; Implementation</strong></summary>
+
+  <p>
+    The FastAPI application structure remains intact, with separation between:
+  </p>
+
+  <ul>
+    <li>schemas</li>
+    <li>prediction logic</li>
+    <li>configuration</li>
+    <li>infrastructure concerns</li>
+  </ul>
+
+  <p>
+    What changed is <strong>how the API is packaged, validated, and deployed</strong>, not how it behaves.
+  </p>
+</details>
+
+<details>
+  <summary><strong>Deployment</strong></summary>
+
+  <p>
+    The service is deployed using a Docker-based workflow:
+  </p>
+
+  <ul>
+    <li>reproducible builds via a single Dockerfile</li>
+    <li>environment-driven configuration</li>
+    <li>automated health checks</li>
+    <li>identical artefacts across local, CI, and production environments</li>
+  </ul>
+
+  <p>
+    This eliminates environment drift and reduces deployment risk.
+  </p>
+</details>
