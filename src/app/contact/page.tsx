@@ -41,7 +41,7 @@ export default function ContactPage() {
             I’m currently looking for a{" "}
             <strong>6-month, credit-bearing internship starting April 2026 </strong>
             - ideally in AI, machine learning, infrastructure, or
-            engineering-focused roles.
+            customer-facing technical roles such as pre-sales engineering and solutions architecture.
             <br /><br />
             Whether it's opportunities, collaboration, or just talking shop about
             AI, infra, or motorcycles - I’m always happy to chat.
