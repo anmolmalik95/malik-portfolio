@@ -1,0 +1,115 @@
+---
+title: "MTG Portfolio Dashboard"
+publishedAt: "2026-01-02"
+summary: "A portfolio visualisation and valuation dashboard for a Magic: The Gathering collection, with historical snapshots, movers, and time-series aggregation."
+images:
+  - "/images/projects/mtg-portfolio-dashboard/cover-03.png"
+team:
+  - name: "Anmol Malik"
+    role: "AI & ML · MLOps · Cloud"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/malikanmol/"
+    link: "https://github.com/anmolmalik95/mtg-portfolio-dashboard"
+---
+
+## Overview
+<Row gap="16" wrap horizontal="start" paddingY="8">
+  <Button
+    href="https://mtg-portfolio-dashboard.streamlit.app/"
+    label="Live demo"
+    prefixIcon="arrowUpRight"
+    variant="secondary"
+    size="m"
+    className="demo-button"
+  />
+
+  <Button
+    href="https://github.com/anmolmalik95/mtg-portfolio-dashboard"
+    label="View on GitHub"
+    prefixIcon="github"
+    variant="secondary"
+    size="m"
+  />
+</Row>
+
+This project is a **portfolio visualisation and valuation dashboard** for a Magic: The Gathering card collection.
+
+It provides a consolidated view of portfolio value over time, supports historical comparisons, and highlights changes in asset prices through aggregated charts and movers. The system integrates external market pricing, persists historical price data, and presents portfolio-level analytics through a lightweight dashboard interface.
+
+Although the domain is MTG, the underlying structure mirrors how portfolios of market-traded assets are typically tracked and analysed.
+
+<details>
+<summary><strong>Problem Framing</strong></summary>
+
+The core problem addressed by this project is consistent portfolio valuation at scale.
+
+When a portfolio contains **hundreds of individual holdings**, each with multiple identifiers and variants, simple “current value” calculations quickly become insufficient. Prices change frequently, identifiers are not always uniform, and historical comparisons can drift if past values are recomputed using current market data.
+
+Instead of only asking “what is this worth right now?”, this project focuses on:
+
+> *How can a portfolio of hundreds of holdings be valued consistently as of a specific date, and compared meaningfully to earlier points in time?*
+
+Solving this requires stable identifiers, controlled ownership data, reproducible pricing, and a way to preserve historical valuations without introducing unnecessary operational complexity.
+
+</details>
+
+<details>
+<summary><strong>Data & Features</strong></summary>
+
+The collection is defined by a single source of truth (`collection.csv`), which records:
+
+- `set_code` – card set identifier  
+- `collector_number` – card printing identifier within the set  
+- `finish` – foil / non-foil  
+- `qty` – quantity held  
+- optional acquisition price (if provided)
+
+This keeps ownership state explicit and easy to update, while market pricing is pulled externally.
+
+Pricing is retrieved from the **Scryfall API**, using official price fields:
+
+- `usd` – non-foil market price  
+- `usd_foil` – foil market price  
+
+Pricing logic selects the correct field based on finish and handles missing/partial price data safely rather than assuming availability.
+
+API responses are cached locally with a TTL to reduce redundant requests and avoid rate-limit issues.
+
+</details>
+
+<details>
+<summary><strong>Snapshotting & Historical Tracking</strong></summary>
+
+Historical prices are persisted as **daily snapshots** in a local SQLite database.
+
+Each snapshot captures portfolio prices as of that date and is appended immutably. Historical values are never overwritten, enabling stable historical comparisons without drift.
+
+Portfolio value over time is computed by combining snapshot prices with holdings and aggregating across snapshot dates, producing a consistent time-series view.
+
+</details>
+
+<details>
+<summary><strong>Analytics & Aggregation</strong></summary>
+
+The dashboard surfaces portfolio-level analytics, including:
+
+- total portfolio value over time  
+- price movers (gainers and losers)  
+- daily / weekly / monthly aggregation  
+
+Weekly and monthly views use the final snapshot within each period to avoid repeated labels or misleading data density.
+
+Movers are calculated only for assets actually held, and unchanged entries are excluded to keep results focused on meaningful changes.
+
+</details>
+
+<details>
+<summary><strong>Implementation & Deployment</strong></summary>
+
+The dashboard is implemented using **Streamlit** as a presentation layer, with pricing, snapshotting, and aggregation logic handled outside the UI.
+
+Data updates occur when the dashboard loads, relying on cached API responses to prevent unnecessary recomputation. Historical state is persisted locally in SQLite.
+
+The application is designed to handle missing data, partial history, and cold starts gracefully without failing or returning incorrect output.
+
+</details>
