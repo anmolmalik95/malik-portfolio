@@ -23,6 +23,9 @@ const routes: RoutesConfig = {
   "/blog": true,
   "/gallery": true,
   "/contact": true,
+  "/calendar": true,
+  "/api/authenticate": true,
+  "/api/check-auth": true,
 };
 
 const display: DisplayConfig = {
@@ -35,6 +38,7 @@ const display: DisplayConfig = {
 // Set password in the .env file, refer to .env.example
 const protectedRoutes: ProtectedRoutesConfig = {
   "/work/automate-design-handovers-with-a-figma-to-code-pipeline": true,
+  "/calendar": true,
 };
 
 // Import and set font for each variant
