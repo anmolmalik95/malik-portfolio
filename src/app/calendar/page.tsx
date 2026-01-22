@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Column, Heading } from "@once-ui-system/core";
 
 export default function CalendarPage() {
   const BASE = useMemo(
@@ -40,31 +41,23 @@ export default function CalendarPage() {
       style={{
         width: "min(1300px, calc(100vw - 32px))",
         margin: "0 auto",
-
-        /* 👇 THIS is what removes the gap */
         paddingTop: isMobile ? 8 : 12,
         paddingLeft: 16,
         paddingRight: 16,
         paddingBottom: 48,
       }}
     >
-      <div style={{ textAlign: "center", marginBottom: 8 }}>
-        <h1
-          style={{
-            fontSize: isMobile ? 34 : 44,
-            margin: 0,
-            lineHeight: 1.1,
-          }}
-        >
-          Availability
-        </h1>
-      </div>
+      {/* HERO */}
+      <Column gap="8" horizontal="center" s={{ textAlign: "center" }}>
+        <Heading variant="display-strong-l">Availability</Heading>
+      </Column>
 
       <div
         style={{
           width: "100%",
           height: isMobile ? "75vh" : "85vh",
           minHeight: isMobile ? 620 : 820,
+          marginTop: 12,
           borderRadius: 16,
           overflow: "hidden",
           border: "1px solid rgba(255,255,255,0.15)",
