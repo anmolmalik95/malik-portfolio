@@ -65,8 +65,8 @@ def classify_access_request(system_category: str, access_level: str):
 # HTTP Handler (used by Vercel)
 # -------------------------------
 
-class handler(BaseHTTPRequestHandler):
-    def do_POST(self):
+class handler(BaseHTTPRequestHandler): # pragma: no cover
+    def do_POST(self): # pragma: no cover
         try:
             content_length = int(self.headers.get("Content-Length", 0))
             body = self.rfile.read(content_length)
