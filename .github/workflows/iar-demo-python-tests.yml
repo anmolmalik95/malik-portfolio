@@ -31,7 +31,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r api/requirements-dev.txt
 
-      - name: Run pytest
+      - name: Run pytest with coverage
         working-directory: iar-demo
         run: |
-          pytest -vv --tb=short --color=yes api/tests
+          pytest api/tests \
+            --cov=api \
+            --cov-report=term-missing \
+            --cov-report=html
+
+      - name: Upload coverage HTML artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html-report
+          path: iar-demo/htmlcov
