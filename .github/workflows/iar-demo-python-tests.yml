@@ -34,7 +34,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r api/requirements-dev.txt
 
-      - name: Run pytest (verbose + colored) + coverage table
+      - name: Run pytest + coverage (verbose + colored) + generate HTML
         working-directory: iar-demo
         env:
           PY_COLORS: "1"
@@ -42,12 +42,8 @@ jobs:
         run: |
           pytest -vv --tb=short --color=yes api/tests \
             --cov=api \
-            --cov-report=term-missing
-
-      - name: Generate coverage HTML (no re-run)
-        working-directory: iar-demo
-        run: |
-          python -m coverage html -d htmlcov
+            --cov-report=term-missing \
+            --cov-report=html:htmlcov
 
       - name: Upload coverage HTML artifact
         if: always()
