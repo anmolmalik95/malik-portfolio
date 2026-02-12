@@ -20,7 +20,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Setup Python (with pip cache)
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -34,18 +34,32 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r api/requirements-dev.txt
 
+      - name: Detect changed files
+        id: changes
+        shell: bash
+        run: |
+          set -e
+          CHANGED="$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" || true)"
+
+          echo "files<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$CHANGED" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          if echo "$CHANGED" | grep -q '^iar-demo/api/classify\.py$'; then
+            echo "what=classify.py" >> "$GITHUB_OUTPUT"
+          else
+            echo "what=iar-demo/api/*" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run pytest + coverage (verbose + colored)
         working-directory: iar-demo
-        shell: bash
-        env:
-          PY_COLORS: "1"
-          FORCE_COLOR: "1"
         run: |
-          set -euo pipefail
           pytest -vv --tb=short --color=yes api/tests \
+            --junitxml=pytest-results.xml \
             --cov=api \
             --cov-report=term-missing \
-            --cov-report=html:htmlcov | tee pytest_output.txt
+            --cov-report=html:htmlcov \
+            --cov-report=xml:coverage.xml
 
       - name: Upload coverage HTML artifact
         if: always()
@@ -58,80 +72,111 @@ jobs:
       - name: Send Telegram notification
         if: always()
         working-directory: iar-demo
-        shell: bash
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_CLASS_CHAT_ID: ${{ secrets.TELEGRAM_CLASS_CHAT_ID }}
+
+          ACTOR: ${{ github.actor }}
+          STATUS: ${{ job.status }}
+          SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+          REPO: ${{ github.repository }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+
+          WHAT_CHANGED: ${{ steps.changes.outputs.what }}
+        shell: bash
         run: |
-          set -euo pipefail
+          python - <<'PY'
+          import os
+          import xml.etree.ElementTree as ET
+          import urllib.request
+          import urllib.parse
 
-          STATUS="${{ job.status }}"
-          ACTOR="${{ github.actor }}"
-          SHORT_SHA="$(echo "${GITHUB_SHA}" | cut -c1-7)"
-          RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          bot = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+          chat_default = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+          chat_class = os.environ.get("TELEGRAM_CLASS_CHAT_ID", "").strip()
 
-          # Decide where to send: default to your DM chat_id, switch only if:
-          #  - commit message contains "class demo"
-          #  - TELEGRAM_CLASS_CHAT_ID is set AND not a placeholder
-          TARGET_CHAT_ID="${TELEGRAM_CHAT_ID}"
-          if echo "${COMMIT_MSG}" | grep -qi "class demo" && \
-             [ -n "${TELEGRAM_CLASS_CHAT_ID:-}" ] && \
-             [ "${TELEGRAM_CLASS_CHAT_ID}" != "DISABLED_FOR_NOW" ]; then
-            TARGET_CHAT_ID="${TELEGRAM_CLASS_CHAT_ID}"
-          fi
+          actor = os.environ.get("ACTOR", "someone")
+          status = os.environ.get("STATUS", "unknown")
+          sha = os.environ.get("SHA", "")[:7]
+          run_url = f"https://github.com/{os.environ.get('REPO','')}/actions/runs/{os.environ.get('RUN_ID','')}"
+          commit_msg = os.environ.get("COMMIT_MSG", "")
+          what_changed = os.environ.get("WHAT_CHANGED", "iar-demo/api/*")
 
-          if [ "${STATUS}" = "success" ]; then
-            EMOJI="🟢"
-          else
-            EMOJI="🔴"
-          fi
+          # Pick chat: default DM, unless commit contains "class demo" and class chat id exists
+          target_chat = chat_default
+          if "class demo" in commit_msg.lower() and chat_class:
+              target_chat = chat_class
 
-          # Detect if classify.py changed in this commit (nice for your message)
-          CHANGED_FILES="$(git show --name-only --pretty="" "${GITHUB_SHA}" || true)"
-          if echo "${CHANGED_FILES}" | grep -q "^iar-demo/api/classify.py$"; then
-            WHAT_CHANGED="classify.py"
-          else
-            WHAT_CHANGED="IAR demo code"
-          fi
+          # Parse coverage %
+          coverage_pct = "Unknown"
+          try:
+              tree = ET.parse("coverage.xml")
+              root = tree.getroot()
+              line_rate = root.attrib.get("line-rate")
+              if line_rate is not None:
+                  coverage_pct = f"{round(float(line_rate) * 100)}%"
+          except Exception:
+              pass
 
-          # Pull coverage % from the saved pytest output
-          COVERAGE="$(grep -E "^TOTAL" pytest_output.txt | awk '{print $NF}' | tail -n 1 || true)"
-          if [ -z "${COVERAGE}" ]; then
-            COVERAGE="Unknown (see Actions log)"
-          fi
+          # Parse test results from JUnit XML (list each test case)
+          tests_lines = []
+          try:
+              t = ET.parse("pytest-results.xml")
+              r = t.getroot()
 
-          # Pull the 4 test lines from saved output and format them nicely
-          TEST_BLOCK="$(grep -E "^api/tests/test_classify.py::" pytest_output.txt | sed -E 's/[[:space:]]+\[[^]]+\]//g' | tail -n 50 || true)"
-          PRETTY_TESTS=""
-          if [ -n "${TEST_BLOCK}" ]; then
-            while IFS= read -r line; do
-              if echo "${line}" | grep -q "PASSED"; then
-                PRETTY_TESTS="${PRETTY_TESTS}✅ ${line}\n"
-              elif echo "${line}" | grep -q "FAILED"; then
-                PRETTY_TESTS="${PRETTY_TESTS}❌ ${line}\n"
-              else
-                PRETTY_TESTS="${PRETTY_TESTS}• ${line}\n"
-              fi
-            done <<< "${TEST_BLOCK}"
-          else
-            PRETTY_TESTS="(Could not parse test list — see Actions log)\n"
-          fi
+              # Some JUnit formats wrap suites; handle both
+              testcase_elems = r.findall(".//testcase")
 
-          # Build message with real newlines
-          MESSAGE="${EMOJI} IAR CI: ${STATUS}
-${ACTOR} pushed ${WHAT_CHANGED}
-Commit: ${SHORT_SHA}
-Coverage: ${COVERAGE}
+              for tc in testcase_elems:
+                  name = tc.attrib.get("name", "unknown_test")
+                  # failures/errors/skips
+                  failed = tc.find("failure") is not None or tc.find("error") is not None
+                  skipped = tc.find("skipped") is not None
 
-Tests:
-${PRETTY_TESTS}
-View run: ${RUN_URL}"
+                  if skipped:
+                      icon = "⏭️"
+                  elif failed:
+                      icon = "❌"
+                  else:
+                      icon = "✅"
 
-          # Send (urlencode preserves newlines cleanly)
-          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-            -d "chat_id=${TARGET_CHAT_ID}" \
-            --data-urlencode "text=${MESSAGE}" \
-            -d "disable_web_page_preview=true" \
-            >/dev/null
+                  tests_lines.append(f"{icon} {name}")
+
+              # If empty for some reason
+              if not tests_lines:
+                  tests_lines = ["(No tests parsed — check Actions log)"]
+          except Exception:
+              tests_lines = ["(Unable to parse test list — check Actions log)"]
+
+          emoji = "🟢" if status == "success" else "🔴"
+          header = "SUCCESS" if status == "success" else status.upper()
+
+          msg = "\n".join([
+              f"{emoji} IAR CI: {header}",
+              f"{actor} pushed {what_changed}",
+              f"Commit: {sha}",
+              f"Coverage: {coverage_pct}",
+              "",
+              "Tests:",
+              *tests_lines,
+              "",
+              f"View run: {run_url}",
+          ])
+
+          if not bot or not target_chat:
+              print("Telegram not configured (missing bot token or chat id).")
+              raise SystemExit(0)
+
+          url = f"https://api.telegram.org/bot{bot}/sendMessage"
+          data = urllib.parse.urlencode({
+              "chat_id": target_chat,
+              "text": msg,
+              "disable_web_page_preview": "true",
+          }).encode("utf-8")
+
+          req = urllib.request.Request(url, data=data, method="POST")
+          with urllib.request.urlopen(req, timeout=20) as resp:
+              print(resp.read().decode("utf-8"))
+          PY
