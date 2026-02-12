@@ -82,7 +82,7 @@ jobs:
       - name: Run pytest + coverage (verbose + colored)
         working-directory: iar-demo
         run: |
-          pytest -vv --tb=no --color=yes api/tests \
+          pytest -vv --tb=no -r0 --color=yes api/tests \
             --junitxml=pytest-results.xml \
             --cov=api \
             --cov-report=term-missing \
