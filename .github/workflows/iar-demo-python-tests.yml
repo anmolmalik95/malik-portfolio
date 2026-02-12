@@ -1,0 +1,37 @@
+name: IAR Demo - Python Classifier Tests
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "iar-demo/api/**"
+      - ".github/workflows/iar-demo-python-tests.yml"
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "iar-demo/api/**"
+      - ".github/workflows/iar-demo-python-tests.yml"
+
+jobs:
+  test-python-classifier:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test deps
+        working-directory: iar-demo
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r api/requirements-dev.txt
+
+      - name: Run pytest
+        working-directory: iar-demo
+        run: |
+          pytest -q api/tests
