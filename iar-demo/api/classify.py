@@ -1,32 +1,23 @@
 import json
 from http.server import BaseHTTPRequestHandler
-from typing import Dict, Set
-
-
-HIGH_RISK_CATEGORIES: Set[str] = {
-    "Customer Data System",
-    "Production Environment",
-}
-
-HIGH_RISK_ROLES: Set[str] = {
-    "Admin",
-    "Super Admin",
-}
+from typing import Dict
 
 
 def classify_access_request(system_category: str, access_level: str) -> Dict[str, str]:
-    """
-    Core risk classification logic.
+    high_risk_categories = {
+        "Customer Data System",
+        "Production Environment",
+    }
 
-    Inputs are strings coming from the web form:
-      - system_category: e.g. "Internal Tool", "Production Environment"
-      - access_level: e.g. "Read Only", "Admin"
+    high_risk_roles = {
+        "Admin",
+        "Super Admin",
+    }
 
-    Output:
-      - risk: "LOW" | "HIGH"
-      - outcome: "AUTO_APPROVED" | "PENDING_MANAGER_REVIEW"
-    """
-    is_high_risk = (system_category in HIGH_RISK_CATEGORIES) or (access_level in HIGH_RISK_ROLES)
+    is_high_risk = (
+        system_category in high_risk_categories
+        or access_level in high_risk_roles
+    )
 
     return {
         "risk": "HIGH" if is_high_risk else "LOW",
@@ -38,8 +29,8 @@ class handler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
             content_length = int(self.headers.get("Content-Length", 0))
-            raw_body = self.rfile.read(content_length)
-            data = json.loads(raw_body.decode("utf-8"))
+            body = self.rfile.read(content_length)
+            data = json.loads(body.decode("utf-8"))
 
             system_category = data.get("systemCategory", "")
             access_level = data.get("accessLevel", "")
