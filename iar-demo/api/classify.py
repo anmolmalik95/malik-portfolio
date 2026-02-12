@@ -52,7 +52,7 @@ def classify_access_request(system_category: str, access_level: str):
     #     "outcome": "AUTO_APPROVED",
     # }
 
-    # return response
+    return response
 
 
 # -------------------------------
