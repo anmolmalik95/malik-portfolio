@@ -32,27 +32,27 @@ def classify_access_request(system_category: str, access_level: str):
     # ✅ CORRECT LOGIC (DEFAULT — SHOULD PASS ALL TESTS)
     # ============================================================
 
-    response = {
-        "risk": "HIGH" if is_high_risk else "LOW",
-        "outcome": (
-            "PENDING_MANAGER_REVIEW"
-            if is_high_risk
-            else "AUTO_APPROVED"
-        ),
-    }
+    # response = {
+    #     "risk": "HIGH" if is_high_risk else "LOW",
+    #     "outcome": (
+    #         "PENDING_MANAGER_REVIEW"
+    #         if is_high_risk
+    #         else "AUTO_APPROVED"
+    #     ),
+    # }
 
     # ============================================================
     # ❌ DEMO BUG — UNCOMMENT THIS BLOCK TO BREAK CI
     # ============================================================
 
-    # response = {
-    #     "risk": "HIGH" if is_high_risk else "LOW",
-    #     # ❌ INTENTIONAL SECURITY BUG:
-    #     # All requests are auto-approved, even high-risk ones.
-    #     "outcome": "AUTO_APPROVED",
-    # }
+    response = {
+        "risk": "HIGH" if is_high_risk else "LOW",
+        # ❌ INTENTIONAL SECURITY BUG:
+        # All requests are auto-approved, even high-risk ones.
+        "outcome": "AUTO_APPROVED",
+    }
 
-    # return response
+    return response
 
 
 # -------------------------------
