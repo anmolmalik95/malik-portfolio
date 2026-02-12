@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Python (with pip cache)
         uses: actions/setup-python@v5
@@ -40,22 +42,41 @@ jobs:
         run: |
           set -e
 
-          CHANGED="$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" || true)"
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.sha }}"
+
+          # Sometimes BEFORE is empty or all zeros (e.g., first push, weird event payloads)
+          if [ -z "$BEFORE" ] || echo "$BEFORE" | grep -q '^0\+$'; then
+            BEFORE="$(git rev-parse "${AFTER}~1" 2>/dev/null || true)"
+          fi
+
+          CHANGED=""
+          if [ -n "$BEFORE" ]; then
+            CHANGED="$(git diff --name-only "$BEFORE" "$AFTER" || true)"
+          fi
+
+          # Prefer changes under iar-demo/api (since that's what your demo cares about)
           CHANGED_API="$(echo "$CHANGED" | grep '^iar-demo/api/' || true)"
 
-          if echo "$CHANGED_API" | grep -qx 'iar-demo/api/classify\.py' && [ "$(echo "$CHANGED_API" | wc -l | tr -d ' ')" -eq 1 ]; then
-            echo "what=classify.py" >> "$GITHUB_OUTPUT"
-          else
-            # show up to 3 changed api files
+          if [ -n "$CHANGED_API" ]; then
             LIST="$(echo "$CHANGED_API" | sed 's|^iar-demo/api/||' | head -n 3 | paste -sd ', ' -)"
-            EXTRA_COUNT="$(echo "$CHANGED_API" | wc -l | tr -d ' ')"
-            if [ -z "$LIST" ]; then
-              echo "what=repo files" >> "$GITHUB_OUTPUT"
-            elif [ "$EXTRA_COUNT" -gt 3 ]; then
-              echo "what=iar-demo/api: $LIST (+$((EXTRA_COUNT-3)) more)" >> "$GITHUB_OUTPUT"
+            COUNT="$(echo "$CHANGED_API" | wc -l | tr -d ' ')"
+            if [ "$COUNT" -gt 3 ]; then
+              echo "what=iar-demo/api: $LIST (+$((COUNT-3)) more)" >> "$GITHUB_OUTPUT"
             else
               echo "what=iar-demo/api: $LIST" >> "$GITHUB_OUTPUT"
             fi
+          elif [ -n "$CHANGED" ]; then
+            # Non-api changes happened (rare for this workflow, but handle cleanly)
+            LIST="$(echo "$CHANGED" | head -n 3 | paste -sd ', ' -)"
+            COUNT="$(echo "$CHANGED" | wc -l | tr -d ' ')"
+            if [ "$COUNT" -gt 3 ]; then
+              echo "what=$LIST (+$((COUNT-3)) more)" >> "$GITHUB_OUTPUT"
+            else
+              echo "what=$LIST" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "what=repo files" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Run pytest + coverage (verbose + colored)
