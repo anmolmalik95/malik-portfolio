@@ -1,29 +1,63 @@
 import json
 from http.server import BaseHTTPRequestHandler
-from typing import Dict
 
 
-def classify_access_request(system_category: str, access_level: str) -> Dict[str, str]:
-    high_risk_categories = {
-        "Customer Data System",
-        "Production Environment",
-    }
+# -------------------------------
+# Core Classification Logic
+# -------------------------------
 
-    high_risk_roles = {
-        "Admin",
-        "Super Admin",
-    }
+HIGH_RISK_CATEGORIES = {
+    "Customer Data System",
+    "Production Environment",
+}
+
+HIGH_RISK_ROLES = {
+    "Admin",
+    "Super Admin",
+}
+
+
+def classify_access_request(system_category: str, access_level: str):
+    """
+    Core risk classification function.
+    This is what pytest tests in CI.
+    """
 
     is_high_risk = (
-        system_category in high_risk_categories
-        or access_level in high_risk_roles
+        system_category in HIGH_RISK_CATEGORIES
+        or access_level in HIGH_RISK_ROLES
     )
 
-    return {
+    # ============================================================
+    # ✅ CORRECT LOGIC (DEFAULT — SHOULD PASS ALL TESTS)
+    # ============================================================
+
+    # response = {
+    #     "risk": "HIGH" if is_high_risk else "LOW",
+    #     "outcome": (
+    #         "PENDING_MANAGER_REVIEW"
+    #         if is_high_risk
+    #         else "AUTO_APPROVED"
+    #     ),
+    # }
+
+    # ============================================================
+    # ❌ DEMO BUG — UNCOMMENT THIS BLOCK TO BREAK CI
+    # ============================================================
+
+    response = {
         "risk": "HIGH" if is_high_risk else "LOW",
-        "outcome": "PENDING_MANAGER_REVIEW" if is_high_risk else "AUTO_APPROVED",
+        # ❌ INTENTIONAL SECURITY BUG:
+        # All requests are auto-approved, even high-risk ones.
+        "outcome": "AUTO_APPROVED",
     }
 
+    return response
+
+
+# -------------------------------
+# HTTP Handler (used by Vercel)
+# -------------------------------
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -35,15 +69,17 @@ class handler(BaseHTTPRequestHandler):
             system_category = data.get("systemCategory", "")
             access_level = data.get("accessLevel", "")
 
-            response = classify_access_request(system_category, access_level)
+            result = classify_access_request(system_category, access_level)
 
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(json.dumps(response).encode("utf-8"))
+            self.wfile.write(json.dumps(result).encode("utf-8"))
 
         except Exception as e:
             self.send_response(500)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(json.dumps({"error": str(e)}).encode("utf-8"))
+            self.wfile.write(
+                json.dumps({"error": str(e)}).encode("utf-8")
+            )
