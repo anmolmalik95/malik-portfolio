@@ -36,15 +36,16 @@ jobs:
 
       - name: Run pytest + coverage (verbose + colored)
         working-directory: iar-demo
+        shell: bash
         env:
           PY_COLORS: "1"
           FORCE_COLOR: "1"
         run: |
+          set -euo pipefail
           pytest -vv --tb=short --color=yes api/tests \
             --cov=api \
             --cov-report=term-missing \
-            --cov-report=html:htmlcov \
-            | tee pytest_output.txt
+            --cov-report=html:htmlcov | tee pytest_output.txt
 
       - name: Upload coverage HTML artifact
         if: always()
@@ -56,6 +57,8 @@ jobs:
 
       - name: Send Telegram notification
         if: always()
+        working-directory: iar-demo
+        shell: bash
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -65,48 +68,70 @@ jobs:
 
           STATUS="${{ job.status }}"
           ACTOR="${{ github.actor }}"
-          SHORT_SHA="${GITHUB_SHA::7}"
+          SHORT_SHA="$(echo "${GITHUB_SHA}" | cut -c1-7)"
           RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           COMMIT_MSG="${{ github.event.head_commit.message }}"
 
-          TARGET_CHAT_ID="$TELEGRAM_CHAT_ID"
-          if echo "$COMMIT_MSG" | grep -qi "class demo" && [ -n "${TELEGRAM_CLASS_CHAT_ID:-}" ]; then
-            TARGET_CHAT_ID="$TELEGRAM_CLASS_CHAT_ID"
+          # Decide where to send: default to your DM chat_id, switch only if:
+          #  - commit message contains "class demo"
+          #  - TELEGRAM_CLASS_CHAT_ID is set AND not a placeholder
+          TARGET_CHAT_ID="${TELEGRAM_CHAT_ID}"
+          if echo "${COMMIT_MSG}" | grep -qi "class demo" && \
+             [ -n "${TELEGRAM_CLASS_CHAT_ID:-}" ] && \
+             [ "${TELEGRAM_CLASS_CHAT_ID}" != "DISABLED_FOR_NOW" ]; then
+            TARGET_CHAT_ID="${TELEGRAM_CLASS_CHAT_ID}"
           fi
 
-          if [ "$STATUS" = "success" ]; then
+          if [ "${STATUS}" = "success" ]; then
             EMOJI="🟢"
           else
             EMOJI="🔴"
           fi
 
-          # Coverage like "100%" from the TOTAL line
-          COVERAGE="$(grep -E '^TOTAL' iar-demo/pytest_output.txt | awk '{print $4}' | head -n 1)"
-          if [ -z "${COVERAGE:-}" ]; then
-            COVERAGE="Unknown"
+          # Detect if classify.py changed in this commit (nice for your message)
+          CHANGED_FILES="$(git show --name-only --pretty="" "${GITHUB_SHA}" || true)"
+          if echo "${CHANGED_FILES}" | grep -q "^iar-demo/api/classify.py$"; then
+            WHAT_CHANGED="classify.py"
+          else
+            WHAT_CHANGED="IAR demo code"
           fi
 
-          # Build test summary (one line per test)
-          TEST_SUMMARY=""
-          while IFS= read -r line; do
-            NAME="$(echo "$line" | sed -E 's/.*::(test_[^ ]+).*/\1/')"
-            if echo "$line" | grep -q "PASSED"; then
-              TEST_SUMMARY="${TEST_SUMMARY}\n✅ ${NAME}"
-            else
-              TEST_SUMMARY="${TEST_SUMMARY}\n❌ ${NAME}"
-            fi
-          done < <(grep -E "api/tests/.*::test_.* (PASSED|FAILED)" iar-demo/pytest_output.txt || true)
-
-          if [ -z "${TEST_SUMMARY:-}" ]; then
-            TEST_SUMMARY="\n(Unable to parse test list — check Actions log)"
+          # Pull coverage % from the saved pytest output
+          COVERAGE="$(grep -E "^TOTAL" pytest_output.txt | awk '{print $NF}' | tail -n 1 || true)"
+          if [ -z "${COVERAGE}" ]; then
+            COVERAGE="Unknown (see Actions log)"
           fi
 
-          MESSAGE="$(printf "<b>%s IAR CI: %s</b>\n\n<b>%s</b> pushed <code>classify.py</code>\nCommit: <code>%s</code>\nCoverage: <b>%s</b>\n\n<b>Tests:</b>%b\n\n<a href=\"%s\">View run</a>" \
-            "$EMOJI" "${STATUS^^}" "$ACTOR" "$SHORT_SHA" "$COVERAGE" "$TEST_SUMMARY" "$RUN_URL")"
+          # Pull the 4 test lines from saved output and format them nicely
+          TEST_BLOCK="$(grep -E "^api/tests/test_classify.py::" pytest_output.txt | sed -E 's/[[:space:]]+\[[^]]+\]//g' | tail -n 50 || true)"
+          PRETTY_TESTS=""
+          if [ -n "${TEST_BLOCK}" ]; then
+            while IFS= read -r line; do
+              if echo "${line}" | grep -q "PASSED"; then
+                PRETTY_TESTS="${PRETTY_TESTS}✅ ${line}\n"
+              elif echo "${line}" | grep -q "FAILED"; then
+                PRETTY_TESTS="${PRETTY_TESTS}❌ ${line}\n"
+              else
+                PRETTY_TESTS="${PRETTY_TESTS}• ${line}\n"
+              fi
+            done <<< "${TEST_BLOCK}"
+          else
+            PRETTY_TESTS="(Could not parse test list — see Actions log)\n"
+          fi
 
+          # Build message with real newlines
+          MESSAGE="${EMOJI} IAR CI: ${STATUS}
+${ACTOR} pushed ${WHAT_CHANGED}
+Commit: ${SHORT_SHA}
+Coverage: ${COVERAGE}
+
+Tests:
+${PRETTY_TESTS}
+View run: ${RUN_URL}"
+
+          # Send (urlencode preserves newlines cleanly)
           curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -d "chat_id=${TARGET_CHAT_ID}" \
             --data-urlencode "text=${MESSAGE}" \
-            -d "parse_mode=HTML" \
-            -d "disable_web_page_preview=true"
-            
+            -d "disable_web_page_preview=true" \
+            >/dev/null
