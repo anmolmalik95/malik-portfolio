@@ -31,16 +31,21 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r api/requirements-dev.txt
 
-      - name: Run pytest with coverage
+      - name: Run pytest + coverage (verbose + colored)
         working-directory: iar-demo
+        env:
+          PY_COLORS: "1"
+          FORCE_COLOR: "1"
         run: |
-          pytest api/tests \
+          pytest -vv --tb=short --color=yes api/tests \
             --cov=api \
             --cov-report=term-missing \
-            --cov-report=html
+            --cov-report=html:htmlcov
 
       - name: Upload coverage HTML artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-html-report
+          name: iar-demo-coverage-html
           path: iar-demo/htmlcov
+          retention-days: 7
