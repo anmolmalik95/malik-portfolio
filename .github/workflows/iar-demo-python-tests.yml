@@ -34,4 +34,4 @@ jobs:
       - name: Run pytest
         working-directory: iar-demo
         run: |
-          pytest -vv api/tests
+          pytest -vv --tb=short --color=yes api/tests
