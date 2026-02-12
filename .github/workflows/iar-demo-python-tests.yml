@@ -39,16 +39,23 @@ jobs:
         shell: bash
         run: |
           set -e
+
           CHANGED="$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" || true)"
+          CHANGED_API="$(echo "$CHANGED" | grep '^iar-demo/api/' || true)"
 
-          echo "files<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$CHANGED" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
-
-          if echo "$CHANGED" | grep -q '^iar-demo/api/classify\.py$'; then
+          if echo "$CHANGED_API" | grep -qx 'iar-demo/api/classify\.py' && [ "$(echo "$CHANGED_API" | wc -l | tr -d ' ')" -eq 1 ]; then
             echo "what=classify.py" >> "$GITHUB_OUTPUT"
           else
-            echo "what=iar-demo/api/*" >> "$GITHUB_OUTPUT"
+            # show up to 3 changed api files
+            LIST="$(echo "$CHANGED_API" | sed 's|^iar-demo/api/||' | head -n 3 | paste -sd ', ' -)"
+            EXTRA_COUNT="$(echo "$CHANGED_API" | wc -l | tr -d ' ')"
+            if [ -z "$LIST" ]; then
+              echo "what=repo files" >> "$GITHUB_OUTPUT"
+            elif [ "$EXTRA_COUNT" -gt 3 ]; then
+              echo "what=iar-demo/api: $LIST (+$((EXTRA_COUNT-3)) more)" >> "$GITHUB_OUTPUT"
+            else
+              echo "what=iar-demo/api: $LIST" >> "$GITHUB_OUTPUT"
+            fi
           fi
 
       - name: Run pytest + coverage (verbose + colored)
