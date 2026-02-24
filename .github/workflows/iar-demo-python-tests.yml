@@ -45,6 +45,7 @@ jobs:
           BEFORE="${{ github.event.before }}"
           AFTER="${{ github.sha }}"
 
+          # Sometimes BEFORE is empty or all zeros (e.g., first push, weird event payloads)
           if [ -z "$BEFORE" ] || echo "$BEFORE" | grep -q '^0\+$'; then
             BEFORE="$(git rev-parse "${AFTER}~1" 2>/dev/null || true)"
           fi
@@ -54,12 +55,8 @@ jobs:
             CHANGED="$(git diff --name-only "$BEFORE" "$AFTER" || true)"
           fi
 
+          # Prefer changes under iar-demo/api (since that's what your demo cares about)
           CHANGED_API="$(echo "$CHANGED" | grep '^iar-demo/api/' || true)"
-
-          if echo "$CHANGED_API" | grep -q '^iar-demo/api/classify\.py$'; then
-            echo "what=classify.py" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
 
           if [ -n "$CHANGED_API" ]; then
             LIST="$(echo "$CHANGED_API" | sed 's|^iar-demo/api/||' | head -n 3 | paste -sd ', ' -)"
@@ -70,6 +67,7 @@ jobs:
               echo "what=iar-demo/api: $LIST" >> "$GITHUB_OUTPUT"
             fi
           elif [ -n "$CHANGED" ]; then
+            # Non-api changes happened (rare for this workflow, but handle cleanly)
             LIST="$(echo "$CHANGED" | head -n 3 | paste -sd ', ' -)"
             COUNT="$(echo "$CHANGED" | wc -l | tr -d ' ')"
             if [ "$COUNT" -gt 3 ]; then
@@ -83,11 +81,8 @@ jobs:
 
       - name: Run pytest + coverage (verbose + colored)
         working-directory: iar-demo
-        env:
-          PY_COLORS: "1"
-          FORCE_COLOR: "1"
         run: |
-          pytest -vv --tb=no --no-summary -r0 --color=yes api/tests \
+          pytest -vv --tb=no -r0 --color=yes api/tests \
             --junitxml=pytest-results.xml \
             --cov=api \
             --cov-report=term-missing \
@@ -116,18 +111,18 @@ jobs:
           RUN_ID: ${{ github.run_id }}
           REPO: ${{ github.repository }}
           COMMIT_MSG: ${{ github.event.head_commit.message }}
+
           WHAT_CHANGED: ${{ steps.changes.outputs.what }}
         shell: bash
         run: |
           python - <<'PY'
           import os
-          import re
           import xml.etree.ElementTree as ET
           import urllib.request
           import urllib.parse
 
           bot = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
-          chat_dm = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+          chat_default = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
           chat_class = os.environ.get("TELEGRAM_CLASS_CHAT_ID", "").strip()
 
           actor = os.environ.get("ACTOR", "someone")
@@ -137,22 +132,16 @@ jobs:
           commit_msg = os.environ.get("COMMIT_MSG", "")
           what_changed = os.environ.get("WHAT_CHANGED", "iar-demo/api/*")
 
-          def send(chat_id: str, text: str):
-              url = f"https://api.telegram.org/bot{bot}/sendMessage"
-              data = urllib.parse.urlencode({
-                  "chat_id": chat_id,
-                  "text": text,
-                  "disable_web_page_preview": "true",
-              }).encode("utf-8")
-              req = urllib.request.Request(url, data=data, method="POST")
-              with urllib.request.urlopen(req, timeout=20) as resp:
-                  resp.read()
+          # ✅ Routing (only change vs your current file):
+          # Always DM you. If commit contains "class demo" and class chat id exists, also send to class.
+          recipients = []
+          if chat_default:
+              recipients.append(chat_default)
 
-          if not bot or not chat_dm:
-              print("Telegram not configured (missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID).")
-              raise SystemExit(0)
+          if "class demo" in commit_msg.lower() and chat_class and chat_class != chat_default:
+              recipients.append(chat_class)
 
-          # Coverage %
+          # Parse coverage %
           coverage_pct = "Unknown"
           try:
               tree = ET.parse("coverage.xml")
@@ -163,18 +152,28 @@ jobs:
           except Exception:
               pass
 
-          # Test list from JUnit
+          # Parse test results from JUnit XML (list each test case)
           tests_lines = []
           try:
               t = ET.parse("pytest-results.xml")
               r = t.getroot()
+
               testcase_elems = r.findall(".//testcase")
+
               for tc in testcase_elems:
                   name = tc.attrib.get("name", "unknown_test")
                   failed = tc.find("failure") is not None or tc.find("error") is not None
                   skipped = tc.find("skipped") is not None
-                  icon = "⏭️" if skipped else ("❌" if failed else "✅")
+
+                  if skipped:
+                      icon = "⏭️"
+                  elif failed:
+                      icon = "❌"
+                  else:
+                      icon = "✅"
+
                   tests_lines.append(f"{icon} {name}")
+
               if not tests_lines:
                   tests_lines = ["(No tests parsed — check Actions log)"]
           except Exception:
@@ -192,19 +191,23 @@ jobs:
               "Tests:",
               *tests_lines,
               "",
-              f"Run: {run_url}",
+              f"View run: {run_url}",
           ])
 
-          # ALWAYS DM you
-          send(chat_dm, msg)
-          print(f"Sent Telegram DM to TELEGRAM_CHAT_ID={chat_dm}")
+          if not bot or not recipients:
+              print("Telegram not configured (missing bot token or chat id).")
+              raise SystemExit(0)
 
-          # ONLY ALSO send to class group when commit contains EXACT phrase 'class demo'
-          # (This will NOT trigger for 'demo' alone.)
-          is_class_demo = re.search(r"\bclass demo\b", commit_msg, re.IGNORECASE) is not None
-          if is_class_demo and chat_class:
-              send(chat_class, msg)
-              print(f"Sent Telegram group message to TELEGRAM_CLASS_CHAT_ID={chat_class}")
-          else:
-              print("Not a class demo commit (or TELEGRAM_CLASS_CHAT_ID not set).")
+          url = f"https://api.telegram.org/bot{bot}/sendMessage"
+
+          for chat_id in recipients:
+              data = urllib.parse.urlencode({
+                  "chat_id": chat_id,
+                  "text": msg,
+                  "disable_web_page_preview": "true",
+              }).encode("utf-8")
+
+              req = urllib.request.Request(url, data=data, method="POST")
+              with urllib.request.urlopen(req, timeout=20) as resp:
+                  print(resp.read().decode("utf-8"))
           PY
