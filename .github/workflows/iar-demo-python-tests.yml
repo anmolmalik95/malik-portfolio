@@ -121,63 +121,60 @@ jobs:
         run: |
           python - <<'PY'
           import os
+          import re
           import xml.etree.ElementTree as ET
           import urllib.request
           import urllib.parse
 
-          bot = (os.environ.get("TELEGRAM_BOT_TOKEN") or "").strip()
-          chat_me = (os.environ.get("TELEGRAM_CHAT_ID") or "").strip()
-          chat_class = (os.environ.get("TELEGRAM_CLASS_CHAT_ID") or "").strip()
+          bot = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+          chat_dm = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+          chat_class = os.environ.get("TELEGRAM_CLASS_CHAT_ID", "").strip()
 
           actor = os.environ.get("ACTOR", "someone")
           status = os.environ.get("STATUS", "unknown")
-          sha = (os.environ.get("SHA", "") or "")[:7]
-          repo = os.environ.get("REPO", "")
-          run_id = os.environ.get("RUN_ID", "")
-          run_url = f"https://github.com/{repo}/actions/runs/{run_id}"
-          commit_msg = os.environ.get("COMMIT_MSG", "") or ""
-          what_changed = os.environ.get("WHAT_CHANGED", "repo files")
+          sha = os.environ.get("SHA", "")[:7]
+          run_url = f"https://github.com/{os.environ.get('REPO','')}/actions/runs/{os.environ.get('RUN_ID','')}"
+          commit_msg = os.environ.get("COMMIT_MSG", "")
+          what_changed = os.environ.get("WHAT_CHANGED", "iar-demo/api/*")
 
-          # Decide recipients: ALWAYS DM; PLUS class group if keyword + id present
-          send_to = []
-          if chat_me:
-              send_to.append(chat_me)
+          def send(chat_id: str, text: str):
+              url = f"https://api.telegram.org/bot{bot}/sendMessage"
+              data = urllib.parse.urlencode({
+                  "chat_id": chat_id,
+                  "text": text,
+                  "disable_web_page_preview": "true",
+              }).encode("utf-8")
+              req = urllib.request.Request(url, data=data, method="POST")
+              with urllib.request.urlopen(req, timeout=20) as resp:
+                  resp.read()
 
-          if ("class demo" in commit_msg.lower()) and chat_class:
-              # send to both (avoid duplicates)
-              if chat_class not in send_to:
-                  send_to.append(chat_class)
-
-          if not bot or not send_to:
-              print("Telegram not configured (missing token or chat ids).")
+          if not bot or not chat_dm:
+              print("Telegram not configured (missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID).")
               raise SystemExit(0)
 
-          # Parse coverage % from coverage.xml
+          # Coverage %
           coverage_pct = "Unknown"
           try:
-              root = ET.parse("coverage.xml").getroot()
+              tree = ET.parse("coverage.xml")
+              root = tree.getroot()
               line_rate = root.attrib.get("line-rate")
               if line_rate is not None:
                   coverage_pct = f"{round(float(line_rate) * 100)}%"
           except Exception:
               pass
 
-          # Parse test results from JUnit XML
+          # Test list from JUnit
           tests_lines = []
           try:
-              r = ET.parse("pytest-results.xml").getroot()
-              for tc in r.findall(".//testcase"):
+              t = ET.parse("pytest-results.xml")
+              r = t.getroot()
+              testcase_elems = r.findall(".//testcase")
+              for tc in testcase_elems:
                   name = tc.attrib.get("name", "unknown_test")
-                  failed = (tc.find("failure") is not None) or (tc.find("error") is not None)
-                  skipped = (tc.find("skipped") is not None)
-                  if skipped:
-                      icon = "⏭️"
-                  elif failed:
-                      icon = "❌"
-                  else:
-                      icon = "✅"
+                  failed = tc.find("failure") is not None or tc.find("error") is not None
+                  skipped = tc.find("skipped") is not None
+                  icon = "⏭️" if skipped else ("❌" if failed else "✅")
                   tests_lines.append(f"{icon} {name}")
-
               if not tests_lines:
                   tests_lines = ["(No tests parsed — check Actions log)"]
           except Exception:
@@ -195,21 +192,19 @@ jobs:
               "Tests:",
               *tests_lines,
               "",
-              f"View run: {run_url}",
+              f"Run: {run_url}",
           ])
 
-          url = f"https://api.telegram.org/bot{bot}/sendMessage"
+          # ALWAYS DM you
+          send(chat_dm, msg)
+          print(f"Sent Telegram DM to TELEGRAM_CHAT_ID={chat_dm}")
 
-          def send(chat_id: str):
-              data = urllib.parse.urlencode({
-                  "chat_id": chat_id,
-                  "text": msg,
-                  "disable_web_page_preview": "true",
-              }).encode("utf-8")
-              req = urllib.request.Request(url, data=data, method="POST")
-              with urllib.request.urlopen(req, timeout=20) as resp:
-                  print(resp.read().decode("utf-8"))
-
-          for cid in send_to:
-              send(cid)
+          # ONLY ALSO send to class group when commit contains EXACT phrase 'class demo'
+          # (This will NOT trigger for 'demo' alone.)
+          is_class_demo = re.search(r"\bclass demo\b", commit_msg, re.IGNORECASE) is not None
+          if is_class_demo and chat_class:
+              send(chat_class, msg)
+              print(f"Sent Telegram group message to TELEGRAM_CLASS_CHAT_ID={chat_class}")
+          else:
+              print("Not a class demo commit (or TELEGRAM_CLASS_CHAT_ID not set).")
           PY
