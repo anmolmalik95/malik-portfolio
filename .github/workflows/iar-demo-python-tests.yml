@@ -45,7 +45,6 @@ jobs:
           BEFORE="${{ github.event.before }}"
           AFTER="${{ github.sha }}"
 
-          # Sometimes BEFORE is empty or all zeros (e.g., first push, weird event payloads)
           if [ -z "$BEFORE" ] || echo "$BEFORE" | grep -q '^0\+$'; then
             BEFORE="$(git rev-parse "${AFTER}~1" 2>/dev/null || true)"
           fi
@@ -55,8 +54,12 @@ jobs:
             CHANGED="$(git diff --name-only "$BEFORE" "$AFTER" || true)"
           fi
 
-          # Prefer changes under iar-demo/api (since that's what your demo cares about)
           CHANGED_API="$(echo "$CHANGED" | grep '^iar-demo/api/' || true)"
+
+          if echo "$CHANGED_API" | grep -q '^iar-demo/api/classify\.py$'; then
+            echo "what=classify.py" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
 
           if [ -n "$CHANGED_API" ]; then
             LIST="$(echo "$CHANGED_API" | sed 's|^iar-demo/api/||' | head -n 3 | paste -sd ', ' -)"
@@ -67,7 +70,6 @@ jobs:
               echo "what=iar-demo/api: $LIST" >> "$GITHUB_OUTPUT"
             fi
           elif [ -n "$CHANGED" ]; then
-            # Non-api changes happened (rare for this workflow, but handle cleanly)
             LIST="$(echo "$CHANGED" | head -n 3 | paste -sd ', ' -)"
             COUNT="$(echo "$CHANGED" | wc -l | tr -d ' ')"
             if [ "$COUNT" -gt 3 ]; then
@@ -81,8 +83,11 @@ jobs:
 
       - name: Run pytest + coverage (verbose + colored)
         working-directory: iar-demo
+        env:
+          PY_COLORS: "1"
+          FORCE_COLOR: "1"
         run: |
-          pytest -vv --tb=no -r0 --color=yes api/tests \
+          pytest -vv --tb=no --no-summary -r0 --color=yes api/tests \
             --junitxml=pytest-results.xml \
             --cov=api \
             --cov-report=term-missing \
@@ -111,7 +116,6 @@ jobs:
           RUN_ID: ${{ github.run_id }}
           REPO: ${{ github.repository }}
           COMMIT_MSG: ${{ github.event.head_commit.message }}
-
           WHAT_CHANGED: ${{ steps.changes.outputs.what }}
         shell: bash
         run: |
@@ -121,58 +125,59 @@ jobs:
           import urllib.request
           import urllib.parse
 
-          bot = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
-          chat_default = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
-          chat_class = os.environ.get("TELEGRAM_CLASS_CHAT_ID", "").strip()
+          bot = (os.environ.get("TELEGRAM_BOT_TOKEN") or "").strip()
+          chat_me = (os.environ.get("TELEGRAM_CHAT_ID") or "").strip()
+          chat_class = (os.environ.get("TELEGRAM_CLASS_CHAT_ID") or "").strip()
 
           actor = os.environ.get("ACTOR", "someone")
           status = os.environ.get("STATUS", "unknown")
-          sha = os.environ.get("SHA", "")[:7]
-          run_url = f"https://github.com/{os.environ.get('REPO','')}/actions/runs/{os.environ.get('RUN_ID','')}"
-          commit_msg = os.environ.get("COMMIT_MSG", "")
-          what_changed = os.environ.get("WHAT_CHANGED", "iar-demo/api/*")
+          sha = (os.environ.get("SHA", "") or "")[:7]
+          repo = os.environ.get("REPO", "")
+          run_id = os.environ.get("RUN_ID", "")
+          run_url = f"https://github.com/{repo}/actions/runs/{run_id}"
+          commit_msg = os.environ.get("COMMIT_MSG", "") or ""
+          what_changed = os.environ.get("WHAT_CHANGED", "repo files")
 
-          # Pick chat: default DM, unless commit contains "class demo" and class chat id exists
-          target_chat = chat_default
-          if "class demo" in commit_msg.lower() and chat_class:
-              target_chat = chat_class
+          # Decide recipients: ALWAYS DM; PLUS class group if keyword + id present
+          send_to = []
+          if chat_me:
+              send_to.append(chat_me)
 
-          # Parse coverage %
+          if ("class demo" in commit_msg.lower()) and chat_class:
+              # send to both (avoid duplicates)
+              if chat_class not in send_to:
+                  send_to.append(chat_class)
+
+          if not bot or not send_to:
+              print("Telegram not configured (missing token or chat ids).")
+              raise SystemExit(0)
+
+          # Parse coverage % from coverage.xml
           coverage_pct = "Unknown"
           try:
-              tree = ET.parse("coverage.xml")
-              root = tree.getroot()
+              root = ET.parse("coverage.xml").getroot()
               line_rate = root.attrib.get("line-rate")
               if line_rate is not None:
                   coverage_pct = f"{round(float(line_rate) * 100)}%"
           except Exception:
               pass
 
-          # Parse test results from JUnit XML (list each test case)
+          # Parse test results from JUnit XML
           tests_lines = []
           try:
-              t = ET.parse("pytest-results.xml")
-              r = t.getroot()
-
-              # Some JUnit formats wrap suites; handle both
-              testcase_elems = r.findall(".//testcase")
-
-              for tc in testcase_elems:
+              r = ET.parse("pytest-results.xml").getroot()
+              for tc in r.findall(".//testcase"):
                   name = tc.attrib.get("name", "unknown_test")
-                  # failures/errors/skips
-                  failed = tc.find("failure") is not None or tc.find("error") is not None
-                  skipped = tc.find("skipped") is not None
-
+                  failed = (tc.find("failure") is not None) or (tc.find("error") is not None)
+                  skipped = (tc.find("skipped") is not None)
                   if skipped:
                       icon = "⏭️"
                   elif failed:
                       icon = "❌"
                   else:
                       icon = "✅"
-
                   tests_lines.append(f"{icon} {name}")
 
-              # If empty for some reason
               if not tests_lines:
                   tests_lines = ["(No tests parsed — check Actions log)"]
           except Exception:
@@ -193,18 +198,18 @@ jobs:
               f"View run: {run_url}",
           ])
 
-          if not bot or not target_chat:
-              print("Telegram not configured (missing bot token or chat id).")
-              raise SystemExit(0)
-
           url = f"https://api.telegram.org/bot{bot}/sendMessage"
-          data = urllib.parse.urlencode({
-              "chat_id": target_chat,
-              "text": msg,
-              "disable_web_page_preview": "true",
-          }).encode("utf-8")
 
-          req = urllib.request.Request(url, data=data, method="POST")
-          with urllib.request.urlopen(req, timeout=20) as resp:
-              print(resp.read().decode("utf-8"))
+          def send(chat_id: str):
+              data = urllib.parse.urlencode({
+                  "chat_id": chat_id,
+                  "text": msg,
+                  "disable_web_page_preview": "true",
+              }).encode("utf-8")
+              req = urllib.request.Request(url, data=data, method="POST")
+              with urllib.request.urlopen(req, timeout=20) as resp:
+                  print(resp.read().decode("utf-8"))
+
+          for cid in send_to:
+              send(cid)
           PY
