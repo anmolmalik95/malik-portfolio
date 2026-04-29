@@ -1,0 +1,141 @@
+---
+title: "Damage"
+publishedAt: "2026-04-29"
+summary: "A bill-splitting web app for groups, with AI-parsed receipts, item-level claiming, and cross-session debt reconciliation across overlapping people."
+images:
+  - "/images/projects/damage/cover-01.png"
+team:
+  - name: "Anmol Malik"
+    role: "AI & ML · MLOps · Cloud"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/malikanmol/"
+    link: "https://github.com/anmolmalik95/damage"
+---
+
+## Overview
+<Row gap="16" wrap horizontal="start" paddingY="8">
+  <Button
+    href="https://damage.malik.codes"
+    label="Live demo"
+    prefixIcon="arrowUpRight"
+    variant="secondary"
+    size="m"
+    className="demo-button"
+  />
+
+  <Button
+    href="https://github.com/anmolmalik95/damage"
+    label="View on GitHub"
+    prefixIcon="github"
+    variant="secondary"
+    size="m"
+  />
+</Row>
+
+A bill-splitting web app built for the messy reality of group dining — multiple venues per night, shared dishes, mixed bill-payers, and inconsistent name spellings across overlapping circles of friends.
+
+The app lets a group photograph each receipt, parses items via a vision LLM, and walks each person through claiming what they ordered. Once everyone has claimed, it produces a per-person breakdown that accounts for shared items, taxes, service charges, and which venue each person paid for. A separate flow consolidates several past sessions into a single debt graph.
+
+The technical centre of the project is a **self-correcting receipt parser** that detects arithmetic mismatches in its own output and re-prompts the model with the discrepancy.
+
+<details>
+<summary><strong>Problem Framing</strong></summary>
+
+Splitting a bill across a group is a small problem when there is one venue, one bill, and one bill-payer. It scales poorly along three axes:
+
+- **Items.** A single receipt can contain dozens of line items, with shared dishes, modifiers, and taxes spread across the whole bill.
+- **Venues.** A single night out often spans multiple venues, each with its own bill and its own bill-payer.
+- **Sessions.** Over time, the same friends overlap across multiple nights, and partial debts accumulate that are easier to reconcile holistically than per-night.
+
+Instead of asking *“what does each person owe in total?”*, the project frames the problem as:
+
+> *Given a set of receipts, a set of venues, and a set of people who may overlap across multiple nights, what does each person owe whom, item by item?*
+
+The goal is a tool where each step is unambiguous, the math is verifiable end-to-end, and disputes can be resolved at the line-item level rather than the bill level.
+
+</details>
+
+<details>
+<summary><strong>Data Model</strong></summary>
+
+Each *session* is a single outing and contains:
+
+- *venues* — restaurants, bars, or transport
+- *items* — line items within each venue (`name`, `quantity`, `unitPrice`)
+- *members* — the people who attended
+- *claims* — links between members and items, with optional `sharedWith` arrays for shared dishes
+- *bill payers* — who paid for each venue, used to compute net debts
+- *payment instructions* — optional per-payer notes (e.g. PayNow / Venmo handle)
+
+Ownership state is explicit and incremental: a session can be edited mid-flow without recomputing earlier state, and members joining late see live updates via Firestore listeners.
+
+</details>
+
+<details>
+<summary><strong>Receipt Parsing</strong></summary>
+
+Receipts are uploaded as photos, base64-encoded, and sent to GPT-4o with a strict system prompt that enforces character-level fidelity:
+
+- Read each price exactly as printed — no rounding, no inference
+- Consolidate repeated line items (e.g. three rows of *Peroni 500ml at $14*) into one item with quantity 3
+- Keep GST and service charge as separate fields, never as line items
+- Treat the printed subtotal on the receipt as ground truth
+
+The endpoint then runs a **verification step**: it sums `quantity × unitPrice` across the parsed items and compares against the parsed subtotal. If the difference exceeds $1, the model is re-prompted with the discrepancy:
+
+> *“Your parsed items sum to $X but the receipt shows subtotal $Y. Please re-examine each item price carefully and correct any misread digits.”*
+
+This catches misreads on thermal-receipt fonts, where digits like `1/7` and `8/6` are easily confused. In practice, the second pass corrects most arithmetic mismatches without further intervention.
+
+The parser is deployed as a Vercel serverless function (`api/parse-receipt.js`) in production, with an equivalent local Express server in development sharing the same prompt and verification logic.
+
+</details>
+
+<details>
+<summary><strong>App Architecture</strong></summary>
+
+The frontend is a React 19 SPA built with Vite and React Router, organised around the user’s flow:
+
+- **Session creation & receipt upload** — capture metadata and upload photos per venue
+- **Confirm items** — review parser output, edit names/prices, add manual items
+- **Share session** — invite members via a shareable URL, configure bill payers
+- **Claim items** — each member selects what they ordered, including shared items
+- **Breakdown** — final per-person totals with payment instructions
+
+State is stored in Firebase Firestore and receipt photos in Firebase Storage. Real-time listeners propagate changes across all open sessions, so each member sees the same state without manual refresh.
+
+A separate **multi-session reconciliation** flow lets a user select several past sessions, fuzzy-cluster members across them (handling inconsistent name spellings), and produce a consolidated debt graph for the entire trip.
+
+</details>
+
+<details>
+<summary><strong>Deployment</strong></summary>
+
+The frontend and `/api/parse-receipt` deploy to Vercel from `main`. Firebase project configuration is supplied via environment variables, and Firebase Storage CORS rules live in `cors.json` and are applied via `gsutil`.
+
+There is no local ML model artefact to ship — the vision capability is delegated to the OpenAI API, which keeps the deployment surface small and the serverless function cold-start fast.
+
+</details>
+
+<details>
+<summary><strong>Example Parsed Output</strong></summary>
+
+A typical parsed venue from the receipt-parsing endpoint:
+
+```json
+{
+  "venueIndex": 0,
+  "venueName": "The Spiffy Dapper",
+  "items": [
+    { "name": "Old Fashioned", "quantity": 2, "unitPrice": 24 },
+    { "name": "Negroni", "quantity": 1, "unitPrice": 22 },
+    { "name": "Peroni 500ml", "quantity": 3, "unitPrice": 14 }
+  ],
+  "subtotal": 112,
+  "gst": { "present": true, "percent": 9, "amount": 10.08 },
+  "serviceCharge": { "present": true, "percent": 10, "amount": 11.20 },
+  "receiptTotal": 133.28
+}
+```
+
+</details>
