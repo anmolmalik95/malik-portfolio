@@ -32,7 +32,7 @@ team:
   />
 </Row>
 
-A bill-splitting web app built for the messy reality of group dining — multiple venues per night, shared dishes, mixed bill-payers, and inconsistent name spellings across overlapping circles of friends.
+A bill-splitting web app built for the messy reality of group dining - multiple venues per night, shared dishes, mixed bill-payers, and inconsistent name spellings across overlapping circles of friends.
 
 The app lets a group photograph each receipt, parses items via a vision LLM, and walks each person through claiming what they ordered. Once everyone has claimed, it produces a per-person breakdown that accounts for shared items, taxes, service charges, and which venue each person paid for. A separate flow consolidates several past sessions into a single debt graph.
 
@@ -60,12 +60,12 @@ The goal is a tool where each step is unambiguous, the math is verifiable end-to
 
 Each *session* is a single outing and contains:
 
-- *venues* — restaurants, bars, or transport
-- *items* — line items within each venue (`name`, `quantity`, `unitPrice`)
-- *members* — the people who attended
-- *claims* — links between members and items, with optional `sharedWith` arrays for shared dishes
-- *bill payers* — who paid for each venue, used to compute net debts
-- *payment instructions* — optional per-payer notes (e.g. PayNow / Venmo handle)
+- *venues* - restaurants, bars, or transport
+- *items* - line items within each venue (`name`, `quantity`, `unitPrice`)
+- *members* - the people who attended
+- *claims* - links between members and items, with optional `sharedWith` arrays for shared dishes
+- *bill payers* - who paid for each venue, used to compute net debts
+- *payment instructions* - optional per-payer notes (e.g. PayNow / Venmo handle)
 
 Ownership state is explicit and incremental: a session can be edited mid-flow without recomputing earlier state, and members joining late see live updates via Firestore listeners.
 
@@ -76,7 +76,7 @@ Ownership state is explicit and incremental: a session can be edited mid-flow wi
 
 Receipts are uploaded as photos, base64-encoded, and sent to GPT-4o with a strict system prompt that enforces character-level fidelity:
 
-- Read each price exactly as printed — no rounding, no inference
+- Read each price exactly as printed - no rounding, no inference
 - Consolidate repeated line items (e.g. three rows of *Peroni 500ml at $14*) into one item with quantity 3
 - Keep GST and service charge as separate fields, never as line items
 - Treat the printed subtotal on the receipt as ground truth
@@ -96,11 +96,11 @@ The parser is deployed as a Vercel serverless function (`api/parse-receipt.js`) 
 
 The frontend is a React 19 SPA built with Vite and React Router, organised around the user’s flow:
 
-- **Session creation & receipt upload** — capture metadata and upload photos per venue
-- **Confirm items** — review parser output, edit names/prices, add manual items
-- **Share session** — invite members via a shareable URL, configure bill payers
-- **Claim items** — each member selects what they ordered, including shared items
-- **Breakdown** — final per-person totals with payment instructions
+- **Session creation & receipt upload** - capture metadata and upload photos per venue
+- **Confirm items** - review parser output, edit names/prices, add manual items
+- **Share session** - invite members via a shareable URL, configure bill payers
+- **Claim items** - each member selects what they ordered, including shared items
+- **Breakdown** - final per-person totals with payment instructions
 
 State is stored in Firebase Firestore and receipt photos in Firebase Storage. Real-time listeners propagate changes across all open sessions, so each member sees the same state without manual refresh.
 
@@ -113,7 +113,7 @@ A separate **multi-session reconciliation** flow lets a user select several past
 
 The frontend and `/api/parse-receipt` deploy to Vercel from `main`. Firebase project configuration is supplied via environment variables, and Firebase Storage CORS rules live in `cors.json` and are applied via `gsutil`.
 
-There is no local ML model artefact to ship — the vision capability is delegated to the OpenAI API, which keeps the deployment surface small and the serverless function cold-start fast.
+There is no local ML model artefact to ship - the vision capability is delegated to the OpenAI API, which keeps the deployment surface small and the serverless function cold-start fast.
 
 </details>
 
