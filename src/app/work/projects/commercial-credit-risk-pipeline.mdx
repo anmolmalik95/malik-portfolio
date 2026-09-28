@@ -1,7 +1,7 @@
 ---
 title: "Commercial Credit Risk Pipeline"
 publishedAt: "2026-09-28"
-summary: "A credit risk pipeline pairing a default-risk model with an LLM adverse-media advisory, built by hand in Python and then rebuilt on a managed ML platform to see what the platform actually absorbs."
+summary: "A credit risk pipeline pairing a default-risk model with an LLM adverse-media advisory, built by hand in Python and rebuilt on a managed ML platform to compare the two approaches."
 images:
   - "/images/projects/commercial-credit-risk-pipeline/cover-01.png"
 team:
@@ -23,108 +23,110 @@ team:
   />
 </Row>
 
-This project is a **commercial credit risk pipeline** that gives a loan officer two independent views of each borrower: a machine learning model that scores default risk from the application financials, and an LLM advisory that reads external news and flags adverse signals the numbers cannot see.
+This project is a **commercial credit risk pipeline** that gives a loan officer two independent views of each borrower: a machine learning model that scores default risk from the application financials, and an LLM advisory that reads external news and flags adverse signals the financials cannot capture.
 
-I built it twice. First entirely by hand in Python - data preparation, model comparison, scoring, the LLM calls, serving, and drift monitoring. Then again on Dataiku DSS, a managed ML platform, with the same data and the same design. The point of doing it twice was to understand, first-hand, what a platform like this actually takes off an engineer's plate, and what it doesn't.
+I built it twice: first by hand in Python, covering data preparation, model comparison, scoring, the LLM calls, serving, and drift monitoring, and then again on Dataiku DSS, a managed ML platform, using the same data and design. Building it both ways was a way to understand where a platform like this saves time and effort, and which parts of the work remain with the engineer.
 
-The design centre of the project is **two independent signals, one human decision**: the model and the advisory never feed into each other, and only meet in the officer's review table.
+The core design principle is **two independent signals, one human decision**. The model and the advisory never feed into each other, and only meet in the officer's review table.
 
 <details>
 <summary><strong>Problem Framing</strong></summary>
 
-A credit model is only as good as what's on the application. A borrower can look healthy on paper - decades of trading, strong debt coverage, no missed payments - while the real risk sits somewhere the form never asks about: their largest customer entering insolvency, their sector posting a third straight quarterly decline, or a regulator opening a probe into leadership.
+A credit model can only assess what is on the application. A borrower can look healthy on paper, with decades of trading history, strong debt coverage, and no missed payments, while facing risks the application never asks about: a major customer entering insolvency, a sector in its third straight quarterly decline, or a regulatory probe into leadership.
 
 Instead of asking *“will this borrower default, based on their financials?”*, the project frames the problem as:
 
 > *How can a credit officer see both what the model can score and what it can't, without letting an unpredictable signal into a regulated decision?*
 
-That constraint drives the whole design. A language model is well suited to reading unstructured news, but its output is not deterministic, so it is kept strictly advisory: it widens what the officer can see, but it gets no vote on the score.
+Language models are well suited to reading unstructured news, but their output is not deterministic. For that reason the advisory is kept strictly separate from the model: its findings are shown to the officer and are never used as a model input.
 
 </details>
 
 <details>
 <summary><strong>Data & Features</strong></summary>
 
-The pipeline has two inputs, in two very different shapes:
+The pipeline takes two inputs:
 
 - **Loan applications** - 2,000 commercial borrowers across ten sectors, with financials (revenue, loan size, margin), ratios (debt coverage, leverage, liquidity), repayment history, and a default / no-default label. This feeds the model.
-- **External context** - a plain-language summary of recent news for 40 borrowers, standing in for what would be a news and watchlist screening feed in production. This feeds the advisory.
+- **External context** - a short plain-language news summary for 40 borrowers, standing in for the news and watchlist screening feed a bank would use in production. This feeds the advisory.
 
-Each external context record also carries a ground-truth label - *should this really be flagged?* - so the advisory can be measured rather than judged by eye on a handful of outputs.
+Each external context record also carries a ground-truth label indicating whether it should be flagged, so the advisory's output can be checked against a known answer.
 
-All data is synthetic, built to carry realistic signal without using real company names. A third *downturn* file - the same borrowers with their fundamentals shifted adversely - exists purely to test drift monitoring.
+All data is synthetic, designed to carry realistic signal without using real company names. A third *downturn* dataset, containing the same borrowers with weaker financials, is used to test drift monitoring.
 
 </details>
 
 <details>
 <summary><strong>Modelling Approach</strong></summary>
 
-Five classifiers were compared on the same held-out set: Logistic Regression, Random Forest, Gradient Boosting, Decision Tree, and XGBoost.
+Five classifiers were trained and compared on the same held-out set: Logistic Regression, Random Forest, Gradient Boosting, Decision Tree, and XGBoost.
 
-**The simplest model won.** Logistic Regression achieved the best ROC AUC (0.86). That is unsurprising - credit risk tends to move steadily with its drivers, which a linear model captures well - and it is also the easiest model to explain to a risk committee or regulator, which matters as much as accuracy in lending.
+Logistic Regression performed best, with a ROC AUC of 0.86. Credit risk tends to rise and fall steadily with its drivers, which suits a linear model, and logistic regression is also the easiest model to explain to a risk committee or regulator.
 
-Two choices mattered more than the model itself:
+Two further decisions shaped how the model is used:
 
-- **Accuracy is the wrong metric.** With a default rate around 15%, approving everyone is 85% accurate and catches zero defaults.
-- **The threshold is a business decision.** Borrowers are flagged at a 30% default probability, roughly twice the average risk. Where that line sits comes down to the cost of a missed default versus the cost of an extra review, not a property of the model.
+- **Evaluation metric.** With a default rate of around 15%, a model that approves everyone is 85% accurate and catches no defaults, so the models were compared on AUC, with precision and recall reported at the chosen threshold.
+- **Decision threshold.** Borrowers are flagged at a 30% predicted default probability, roughly twice the average risk. Setting this line is a trade-off between the cost of a missed default and the cost of an extra manual review, and in practice would be agreed with the credit team.
 
-The strongest drivers - leverage, prior delinquencies, and debt service coverage - line up with how a credit analyst would rank risk.
+The strongest drivers (leverage, prior delinquencies, and debt service coverage) are consistent with how a credit analyst would typically rank risk.
 
 </details>
 
 <details>
 <summary><strong>The Advisory</strong></summary>
 
-For each borrower, an LLM reads the external context and returns a structured assessment: whether there is an adverse signal, what kind (customer, sector, leadership, litigation, or credit deterioration), how severe it is, a one-line note for the officer, and whether closer review is recommended.
+For each borrower, an LLM reads the external context and returns a structured assessment:
 
-It is deliberately bounded:
+- whether there is an adverse signal
+- its type (customer, sector, leadership, litigation, or credit deterioration)
+- its severity
+- a one-line note for the officer
+- whether closer review is recommended
 
-- It never sees the model's score, or the ground-truth label
-- It flags signals; it does not make lending decisions
-- Its output is parsed into typed fields before anyone sees it, so the officer gets a consistent record rather than free text
+The advisory never sees the model's score or the ground-truth label, and it makes no lending decisions. Its output is parsed into typed fields before being shown, so the officer receives a consistent record for every borrower.
 
 </details>
 
 <details>
 <summary><strong>Serving & Monitoring</strong></summary>
 
-Training the model was only one part of putting it into production. The hand-built version also serves the model through a **FastAPI** endpoint that scores a single live application, and runs a **drift check** that compares incoming applications against the training data and flags when they no longer look alike.
+The hand-built version also includes two production components: a **FastAPI** endpoint that scores a single live application, and a **drift check** that compares incoming applications to the training data and flags significant shifts.
 
-Both are small in code but easy to get subtly wrong. The preprocessing fitted at training time has to be saved and re-applied identically for every live request - otherwise the model quietly returns a confident, wrong answer. Against the downturn dataset, the drift check flags the financial ratios as shifted while structural features like sector stay stable, which is exactly what it should do.
+The main challenge in serving was consistency. The preprocessing fitted during training has to be saved and applied identically to every live request; if the two fall out of step, the model still returns a score, but the score is wrong. For monitoring, the downturn dataset was run through the drift check, which flagged the shifted financial ratios while leaving stable features such as sector unflagged.
 
 </details>
 
 <details>
 <summary><strong>Rebuilding on a Managed Platform</strong></summary>
 
-With the hand-built version working, I rebuilt the same pipeline - same data, same model, same advisory - on Dataiku DSS. The hand-built version took roughly **ten hours**; the platform version took about **three**.
+With the hand-built version complete, I rebuilt the same pipeline on Dataiku DSS, using the same data, model choice, and advisory design. The hand-built version took roughly **ten hours**; the platform version took about **three**.
 
-The difference was not in the thinking. It was in the plumbing. Seven things I had built and would have had to maintain myself were handled natively:
+Most of the time saved came from infrastructure work that the platform provides out of the box. Seven components I had written by hand were handled natively:
 
-- Saving and re-applying preprocessing → packaged with the model
-- Writing and comparing five models → AutoML
-- Writing the prompt and parsing the JSON → an LLM recipe and visual data preparation
-- Wiring the stages together → the visual Flow
-- Containerising the runtime → managed execution and deployment
-- Keeping the model and advisory apart → separation visible in the Flow
-- Building drift monitoring → evaluation stores and drift analysis
+- **Preprocessing at scoring time** - packaged with the trained model
+- **Comparing five models** - AutoML
+- **Prompting the LLM and parsing its output** - an LLM recipe and visual data preparation
+- **Connecting the stages** - the visual Flow
+- **Containerising the runtime** - managed execution and deployment
+- **Separating the model and advisory** - visible in the structure of the Flow
+- **Drift monitoring** - evaluation stores and drift analysis
 
 Three differences stood out in practice:
 
-- **Mixed interfaces on one pipeline.** Python where I wanted control, visual steps everywhere else - the kind of setup where an analyst and an engineer can work on the same project without handing files back and forth.
-- **Swapping the LLM provider was a dropdown.** In the hand-built version the provider is hardcoded; moving from OpenAI to Anthropic would mean rewriting the client, authentication, and response handling.
-- **Governance became visible.** The model-advisory separation, a rule I had enforced in code, became something anyone could see in the Flow, with lineage tracked automatically.
+- **Mixed interfaces on one pipeline.** I used Python where I wanted fine control and visual steps elsewhere, in a single project that an analyst and an engineer could both work in.
+- **Changing LLM provider.** In the hand-built version the provider is hardcoded, and moving from OpenAI to Anthropic would mean rewriting the client, authentication, and response handling. On the platform it was a configuration change.
+- **Visible governance.** The separation between model and advisory, which I had enforced in code, could be seen directly in the Flow, with data lineage tracked automatically.
 
-The takeaway: **the work still happens, and the design is still mine.** The platform takes over the parts that don't need a person, which is where most of the long-term maintenance burden sits.
+The design decisions, from framing the problem to choosing the threshold and bounding the advisory, were the same in both builds. The platform's contribution was in the surrounding infrastructure, which is also where most of the long-term maintenance effort sits.
 
 </details>
 
 <details>
 <summary><strong>Example Output</strong></summary>
 
-This is the case the design exists for. Ember Outlets looks straightforward on paper - $79.4M in revenue, debt service coverage of 1.49x, no missed payments - and the model scores it comfortably below the review threshold.
+Ember Outlets is a representative case. On paper it looks sound, with $79.4M in revenue, debt service coverage of 1.49x, and no missed payments, and the model scores it well below the review threshold.
 
-The advisory disagrees:
+The advisory flags it:
 
 ```json
 {
@@ -137,6 +139,6 @@ The advisory disagrees:
 }
 ```
 
-The model's score doesn't change, and it shouldn't. But the officer now sees both signals side by side, and makes the call with the full picture.
+The model score stays as it is. The officer sees the score and the advisory together, and decides whether the customer concentration risk warrants a closer look before approval.
 
 </details>
