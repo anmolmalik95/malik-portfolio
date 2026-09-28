@@ -1,0 +1,141 @@
+---
+title: "Commercial Credit Risk Pipeline"
+publishedAt: "2026-09-28"
+summary: "A credit risk pipeline pairing a default-risk model with an LLM adverse-media advisory, built by hand in Python and then rebuilt on a managed ML platform to see what the platform actually absorbs."
+images: []
+team:
+  - name: "Anmol Malik"
+    role: "AI & ML · MLOps · Cloud"
+    avatar: "/images/avatar.jpg"
+    linkedIn: "https://www.linkedin.com/in/malikanmol/"
+    link: "https://github.com/anmolmalik95/commercial-credit-risk-pipeline"
+---
+
+## Overview
+<Row gap="16" wrap horizontal="start" paddingY="8">
+  <Button
+    href="https://github.com/anmolmalik95/commercial-credit-risk-pipeline"
+    label="View on GitHub"
+    prefixIcon="github"
+    variant="secondary"
+    size="m"
+  />
+</Row>
+
+This project is a **commercial credit risk pipeline** that gives a loan officer two independent views of each borrower: a machine learning model that scores default risk from the application financials, and an LLM advisory that reads external news and flags adverse signals the numbers cannot see.
+
+I built it twice. First entirely by hand in Python - data preparation, model comparison, scoring, the LLM calls, serving, and drift monitoring. Then again on Dataiku DSS, a managed ML platform, with the same data and the same design. The point of doing it twice was to understand, first-hand, what a platform like this actually takes off an engineer's plate, and what it doesn't.
+
+The design centre of the project is **two independent signals, one human decision**: the model and the advisory never feed into each other, and only meet in the officer's review table.
+
+<details>
+<summary><strong>Problem Framing</strong></summary>
+
+A credit model is only as good as what's on the application. A borrower can look healthy on paper - decades of trading, strong debt coverage, no missed payments - while the real risk sits somewhere the form never asks about: their largest customer entering insolvency, their sector posting a third straight quarterly decline, or a regulator opening a probe into leadership.
+
+Instead of asking *“will this borrower default, based on their financials?”*, the project frames the problem as:
+
+> *How can a credit officer see both what the model can score and what it can't, without letting an unpredictable signal into a regulated decision?*
+
+That constraint drives the whole design. A language model is well suited to reading unstructured news, but its output is not deterministic, so it is kept strictly advisory: it widens what the officer can see, but it gets no vote on the score.
+
+</details>
+
+<details>
+<summary><strong>Data & Features</strong></summary>
+
+The pipeline has two inputs, in two very different shapes:
+
+- **Loan applications** - 2,000 commercial borrowers across ten sectors, with financials (revenue, loan size, margin), ratios (debt coverage, leverage, liquidity), repayment history, and a default / no-default label. This feeds the model.
+- **External context** - a plain-language summary of recent news for 40 borrowers, standing in for what would be a news and watchlist screening feed in production. This feeds the advisory.
+
+Each external context record also carries a ground-truth label - *should this really be flagged?* - so the advisory can be measured rather than judged by eye on a handful of outputs.
+
+All data is synthetic, built to carry realistic signal without using real company names. A third *downturn* file - the same borrowers with their fundamentals shifted adversely - exists purely to test drift monitoring.
+
+</details>
+
+<details>
+<summary><strong>Modelling Approach</strong></summary>
+
+Five classifiers were compared on the same held-out set: Logistic Regression, Random Forest, Gradient Boosting, Decision Tree, and XGBoost.
+
+**The simplest model won.** Logistic Regression achieved the best ROC AUC (0.86). That is unsurprising - credit risk tends to move steadily with its drivers, which a linear model captures well - and it is also the easiest model to explain to a risk committee or regulator, which matters as much as accuracy in lending.
+
+Two choices mattered more than the model itself:
+
+- **Accuracy is the wrong metric.** With a default rate around 15%, approving everyone is 85% accurate and catches zero defaults.
+- **The threshold is a business decision.** Borrowers are flagged at a 30% default probability, roughly twice the average risk. Where that line sits comes down to the cost of a missed default versus the cost of an extra review, not a property of the model.
+
+The strongest drivers - leverage, prior delinquencies, and debt service coverage - line up with how a credit analyst would rank risk.
+
+</details>
+
+<details>
+<summary><strong>The Advisory</strong></summary>
+
+For each borrower, an LLM reads the external context and returns a structured assessment: whether there is an adverse signal, what kind (customer, sector, leadership, litigation, or credit deterioration), how severe it is, a one-line note for the officer, and whether closer review is recommended.
+
+It is deliberately bounded:
+
+- It never sees the model's score, or the ground-truth label
+- It flags signals; it does not make lending decisions
+- Its output is parsed into typed fields before anyone sees it, so the officer gets a consistent record rather than free text
+
+</details>
+
+<details>
+<summary><strong>Serving & Monitoring</strong></summary>
+
+Training the model was only one part of putting it into production. The hand-built version also serves the model through a **FastAPI** endpoint that scores a single live application, and runs a **drift check** that compares incoming applications against the training data and flags when they no longer look alike.
+
+Both are small in code but easy to get subtly wrong. The preprocessing fitted at training time has to be saved and re-applied identically for every live request - otherwise the model quietly returns a confident, wrong answer. Against the downturn dataset, the drift check flags the financial ratios as shifted while structural features like sector stay stable, which is exactly what it should do.
+
+</details>
+
+<details>
+<summary><strong>Rebuilding on a Managed Platform</strong></summary>
+
+With the hand-built version working, I rebuilt the same pipeline - same data, same model, same advisory - on Dataiku DSS. The hand-built version took roughly **ten hours**; the platform version took about **three**.
+
+The difference was not in the thinking. It was in the plumbing. Seven things I had built and would have had to maintain myself were handled natively:
+
+- Saving and re-applying preprocessing → packaged with the model
+- Writing and comparing five models → AutoML
+- Writing the prompt and parsing the JSON → an LLM recipe and visual data preparation
+- Wiring the stages together → the visual Flow
+- Containerising the runtime → managed execution and deployment
+- Keeping the model and advisory apart → separation visible in the Flow
+- Building drift monitoring → evaluation stores and drift analysis
+
+Three differences stood out in practice:
+
+- **Mixed interfaces on one pipeline.** Python where I wanted control, visual steps everywhere else - the kind of setup where an analyst and an engineer can work on the same project without handing files back and forth.
+- **Swapping the LLM provider was a dropdown.** In the hand-built version the provider is hardcoded; moving from OpenAI to Anthropic would mean rewriting the client, authentication, and response handling.
+- **Governance became visible.** The model-advisory separation, a rule I had enforced in code, became something anyone could see in the Flow, with lineage tracked automatically.
+
+The takeaway: **the work still happens, and the design is still mine.** The platform takes over the parts that don't need a person, which is where most of the long-term maintenance burden sits.
+
+</details>
+
+<details>
+<summary><strong>Example Output</strong></summary>
+
+This is the case the design exists for. Ember Outlets looks straightforward on paper - $79.4M in revenue, debt service coverage of 1.49x, no missed payments - and the model scores it comfortably below the review threshold.
+
+The advisory disagrees:
+
+```json
+{
+  "borrower_id": "B1122",
+  "adverse_signal": true,
+  "signal_type": "customer_risk",
+  "severity": "high",
+  "advisory_note": "Ember Outlets faces a material customer concentration risk because its largest customer has entered insolvency proceedings, which could significantly reduce revenue and cash flow.",
+  "recommend_review": true
+}
+```
+
+The model's score doesn't change, and it shouldn't. But the officer now sees both signals side by side, and makes the call with the full picture.
+
+</details>
