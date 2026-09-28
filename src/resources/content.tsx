@@ -46,7 +46,7 @@ const social: Social = [
   {
     name: "Resume",
     icon: "file",
-    link: "/anmol_malik_resume_2026.pdf",
+    link: "/anmol_malik_resume_2026_sept.pdf",
     essential: true,
   },
 ];
